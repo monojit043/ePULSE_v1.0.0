@@ -10,10 +10,12 @@
 //   - id gets a default sequence so uploads can insert (copied rows keep their PC-2 ids)
 //
 // Run:  npm run db:line-list        (DRY_RUN=1 first; safe to re-run — never copies twice)
+//        NO_COPY=1 npm run db:line-list   → create the table EMPTY (fresh production install)
 require("dotenv").config({ path: require("path").join(__dirname, "..", ".env") });
 const { pool } = require("./pool");
 
 const DRY_RUN = process.env.DRY_RUN === "1";
+const NO_COPY = process.env.NO_COPY === "1";
 
 // Columns 1–26 exactly as on PC-2, then the normalizer extras
 const CREATE_SQL = `
@@ -82,7 +84,9 @@ async function main() {
 
     const { rows: [{ n: existing }] } = await client.query("SELECT count(*)::int n FROM line_list");
     let copied = 0;
-    if (existing === 0) {
+    if (existing === 0 && NO_COPY) {
+      console.log("  table is empty — NO_COPY=1, leaving it empty");
+    } else if (existing === 0) {
       // One-time copy from PC-2 through the existing pc2_pims link (read-only), via a scratch schema
       console.log("  table is empty — copying the current rows from PC-2 (read-only)...");
       await client.query(`
