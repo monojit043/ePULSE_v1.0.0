@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>P&amp;ID Index &amp; Documents — PIMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/ll-suite.css"/>
+  <style>
+    /* ── Two-column layout: entry card left, filter+table right ── */
+    .two-col { display: grid; grid-template-columns: 380px 1fr; gap: 1.5rem; align-items: start; }
+    @media (max-width: 960px) { .two-col { grid-template-columns: 1fr; } }
+    .entry-card { position: sticky; top: 1rem; }
+
+    /* ── Tabs (Import Index / Add Single Row / Upload Documents) ── */
+    .tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 1.1rem; }
+    .tab-btn {
+      padding: 9px 16px; font-size: 13px; font-weight: 500; font-family: inherit;
+      background: none; border: none; cursor: pointer; color: var(--text-muted);
+      border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s;
+    }
+    .tab-btn.active { color: var(--blue-600); border-bottom-color: var(--blue-600); font-weight: 600; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── Job/Unit selector row ── */
+    .sel-bar { display: flex; gap: 10px; }
+    .sel-bar .form-group { flex: 1; min-width: 0; }
+
+    .pmi-template-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12px; font-weight: 600; color: var(--blue-600);
+      text-decoration: none; margin-top: 8px;
+    }
+    .pmi-template-link:hover { text-decoration: underline; }
+    .pmi-template-link svg { width: 12px; height: 12px; }
+
+    /* ── Result banner after import/add ── */
+    #importResult, #addResult { display: none; margin-top: 0.9rem; }
+    .result-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 14px; border-radius: var(--radius);
+      font-size: 12.5px; font-weight: 500;
+    }
+    .result-banner.success { background: rgba(40,167,69,0.09); color: #1a7a33; border: 1px solid rgba(40,167,69,0.22); }
+    .result-banner.error   { background: rgba(229,57,53,0.09); color: #b71c1c; border: 1px solid rgba(229,57,53,0.22); }
+    .result-banner svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    .pmi-skip-table { width: 100%; margin-top: 8px; font-size: 11.5px; border-collapse: collapse; }
+    .pmi-skip-table th { text-align: left; padding: 4px 6px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    .pmi-skip-table td { padding: 4px 6px; border-bottom: 1px solid var(--gray-100); }
+
+    /* ── Index import preview (PDF / Excel) ── */
+    .result-banner.warn { background: rgba(245,158,11,0.10); color: #92400e; border: 1px solid rgba(245,158,11,0.28); }
+    .pmi-idx-head { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 12px; margin-top: 0.9rem;
+                    padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--gray-50, #f8fafc); }
+    .pmi-idx-head dt { color: var(--text-muted); font-weight: 600; }
+    .pmi-idx-head dd { margin: 0; font-weight: 600; }
+    .pmi-idx-counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0.75rem 0 0.4rem; }
+    .pmi-idx-scroll { max-height: 420px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+    .pmi-idx-table { width: 100%; font-size: 11.5px; border-collapse: collapse; }
+    .pmi-idx-table th { position: sticky; top: 0; background: #fff; text-align: left; padding: 5px 6px; color: var(--text-muted);
+                        font-weight: 600; border-bottom: 1px solid var(--border); }
+    .pmi-idx-table td { padding: 5px 6px; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
+    .pmi-idx-table tr.skip td { color: var(--text-muted); }
+    .pmi-idx-note { display: block; font-size: 11px; color: var(--text-muted); }
+    .pmi-idx-note.warn { color: #b45309; }
+    .pmi-idx-revs b { color: var(--blue-600, #2563eb); }
+    .pmi-idx-missing { margin-top: 0.6rem; font-size: 11.5px; }
+    .pmi-idx-missing summary { cursor: pointer; color: var(--text-muted); font-weight: 600; }
+    .pmi-desc { max-width: 260px; font-size: 12px; }
+    .pmi-idxrev { font-size: 11.5px; white-space: nowrap; }
+    .pmi-rev-diff { display: inline-block; margin-left: 4px; font-size: 10.5px; font-weight: 700; color: #b45309; }
+    .pmi-file { margin-top: 0.7rem; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); }
+    .pmi-file > summary { cursor: pointer; font-size: 12.5px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .pmi-file > summary b { word-break: break-all; }
+    .pmi-issues { margin-top: 1.2rem; }
+    .pmi-issues h4 { margin: 0 0 6px; font-size: 12.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .03em; }
+    .pmi-issue { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 6px; font-size: 12px; }
+    .pmi-issue-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+    .pmi-issue-file { font-weight: 600; word-break: break-all; }
+    .pmi-issue-dl { font-size: 12px; font-weight: 600; color: var(--blue-600, #2563eb); text-decoration: none; white-space: nowrap; }
+    .pmi-issue-dl:hover { text-decoration: underline; }
+
+    /* ── Status filter segmented control ── */
+    .seg-control { display: flex; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; flex-shrink: 0; }
+    .seg-btn {
+      padding: 7px 13px; font-size: 12px; font-weight: 600; font-family: inherit;
+      background: #fff; border: none; border-right: 1px solid var(--border); cursor: pointer;
+      color: var(--text-muted); transition: background 0.15s, color 0.15s;
+    }
+    .seg-btn:last-child { border-right: none; }
+    .seg-btn.active { background: var(--blue-600); color: #fff; }
+
+    .pmi-row-name { font-weight: 600; color: var(--text-primary); }
+    .pmi-muted { color: var(--text-muted); font-size: 12px; }
+
+    /* ── Live Job/Unit preview parsed from the typed P&ID Name ── */
+    .pmi-parse-preview { font-size: 12px; margin-top: 6px; min-height: 16px; }
+    .pmi-parse-preview.ok { color: #1a7a33; }
+    .pmi-parse-preview.bad { color: #b71c1c; }
+    .pmi-parse-preview b { font-weight: 700; }
+
+    /* ── Retire confirm modal (page-scoped, not a native prompt()) ── */
+    .pmi-modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+      z-index: 200; align-items: center; justify-content: center;
+    }
+    .pmi-modal-overlay.open { display: flex; }
+    .pmi-modal {
+      background: #fff; border-radius: var(--radius); width: 400px; max-width: 92vw;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25); overflow: hidden;
+    }
+    .pmi-modal-head { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
+    .pmi-modal-head h3 { font-size: 14.5px; font-weight: 700; color: var(--text-primary); }
+    .pmi-modal-head p { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .pmi-modal-body { padding: 14px 18px; }
+    .pmi-modal-body textarea {
+      width: 100%; min-height: 70px; resize: vertical; font-family: inherit; font-size: 13px;
+      padding: 9px 11px; border: 1px solid var(--border); border-radius: 7px; box-sizing: border-box;
+    }
+    .pmi-modal-body textarea:focus { outline: none; border-color: var(--blue-600); box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+    .pmi-modal-foot { padding: 12px 18px 16px; display: flex; justify-content: flex-end; gap: 8px; }
+    .pmi-modal.wide { width: 620px; max-height: 82vh; display: flex; flex-direction: column; }
+    .pmi-modal.wide .pmi-modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .pmi-modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; flex-shrink: 0; }
+    .pmi-modal-body.no-pad { padding: 0; overflow-y: auto; }
+
+    /* ── Shared Job/Unit selector — one place, above the tabs, hidden on the
+       Upload Documents tab since that flow needs no dropdown at all (the
+       filename alone determines everything, cross-checked server-side
+       against the Master Index). ── */
+    #sharedScopeBar.hidden { display: none; }
+
+    .pmi-convention {
+      font-size: 11.5px; color: var(--text-muted); background: var(--gray-50);
+      border: 1px solid var(--border); border-radius: 7px; padding: 8px 11px; margin-top: 8px;
+      line-height: 1.5;
+    }
+    .pmi-convention b { color: var(--text-secondary); font-family: monospace; }
+
+    .pmi-force-toggle {
+      display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted);
+      cursor: pointer; margin-top: 10px; user-select: none;
+    }
+    .pmi-force-panel { display: none; margin-top: 8px; }
+    .pmi-force-panel.open { display: block; }
+    .pmi-force-panel textarea {
+      width: 100%; min-height: 54px; resize: vertical; font-family: inherit; font-size: 12.5px;
+      padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; box-sizing: border-box;
+      margin-top: 6px;
+    }
+
+    .pmi-file-outcomes { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+    .pmi-outcome-row {
+      display: flex; align-items: flex-start; gap: 9px; padding: 8px 10px;
+      border: 1px solid var(--border); border-radius: 7px; font-size: 12px;
+    }
+    .pmi-outcome-row.ok { background: rgba(40,167,69,0.05); border-color: rgba(40,167,69,0.2); }
+    .pmi-outcome-row.fail { background: rgba(229,57,53,0.05); border-color: rgba(229,57,53,0.2); }
+    .pmi-outcome-row.warn { background: rgba(217,119,6,0.06); border-color: rgba(217,119,6,0.25); }
+    .pmi-outcome-icon { flex-shrink: 0; width: 15px; height: 15px; margin-top: 1px; }
+    .pmi-outcome-icon.ok { color: #1a7a33; }
+    .pmi-outcome-icon.fail { color: #b71c1c; }
+    .pmi-outcome-icon.warn { color: #d97706; }
+    .pmi-outcome-name { font-weight: 600; color: var(--text-primary); word-break: break-all; }
+    .pmi-outcome-msg { color: var(--text-muted); margin-top: 2px; }
+
+    .pmi-rev-chip {
+      font-family: monospace; font-size: 11.5px; font-weight: 700; padding: 2px 8px;
+      border-radius: 100px; background: rgba(0,123,255,0.1); color: var(--blue-600);
+    }
+    .pmi-rev-chip.none { background: var(--gray-100); color: var(--text-muted); font-weight: 500; font-family: inherit; }
+    tr.pmi-just-uploaded td { background: #ecfdf5; }
+    tr.pmi-just-uploaded td:first-child { box-shadow: inset 3px 0 0 #10b981; }
+    .pmi-pending-chip {
+      font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 100px;
+      background: rgba(217,119,6,0.12); color: #d97706; margin-left: 6px; cursor: default;
+    }
+
+    .pmi-hist-row { display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-bottom: 1px solid var(--gray-100); font-size: 12.5px; }
+    .pmi-hist-row:last-child { border-bottom: none; }
+    .pmi-hist-rev { font-family: monospace; font-weight: 700; width: 34px; flex-shrink: 0; }
+    .pmi-hist-file { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); display: block; }
+
+    /* ── Links that open the actual PDF (row name, history file name) ── */
+    .pmi-open-link { text-decoration: none; }
+    .pmi-open-link:hover { text-decoration: underline; color: var(--blue-600) !important; }
+    .pmi-hist-meta { color: var(--text-muted); font-size: 11.5px; flex-shrink: 0; text-align: right; }
+
+    /* ── Activity Log section (Step 8 audit trail), appended below revisions
+       in the same modal — same .pmi-hist-row rhythm, not a new component. ── */
+    .pmi-audit-heading {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-muted); padding: 12px 18px 6px; background: var(--gray-50);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .pmi-audit-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue-600); display: inline-block; }
+    .pmi-audit-reason { font-size: 11.5px; color: var(--text-muted); font-style: italic; margin-top: 2px; }
+
+    /* ── Pending-review detail block (Step 5) — appended right under a
+       pending_review row in the History modal, not a separate view. ── */
+    .pmi-pending-detail {
+      padding: 10px 18px 14px; background: rgba(217,119,6,0.05);
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .pmi-pending-compare { font-size: 12px; color: var(--text-secondary); line-height: 1.7; }
+    .pmi-pending-reason {
+      width: 100%; min-height: 44px; resize: vertical; font-family: inherit; font-size: 12px;
+      padding: 7px 9px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box;
+      margin-top: 8px;
+    }
+    .pmi-pending-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+    .pmi-pending-error { font-size: 11.5px; color: #b71c1c; margin-top: 6px; text-align: right; }
+  </style>
+</head>
+<body>
+<div class="ll-shell">
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header class="ll-topbar">
+    <a class="ll-topbar-logo" href="gateway.html">
+      <div class="ll-topbar-brand">
+        <span class="ll-topbar-name">PIMS</span>
+        <span class="ll-topbar-sub">Piping Isometrics</span>
+      </div>
+    </a>
+    <div class="ll-topbar-div"></div>
+    <div class="ll-topbar-module">
+      <div class="ll-topbar-module-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/>
+        </svg>
+      </div>
+      <span class="ll-topbar-module-name">P&amp;ID Index &amp; Documents</span>
+      <span class="ll-topbar-module-badge" id="topBadge">—</span>
+    </div>
+    <div class="ll-topbar-spacer"></div>
+    <button class="ll-back-btn" onclick="window.close()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back to Gateway
+    </button>
+  </header>
+
+  <!-- ═══ BREADCRUMB ═══ -->
+  <div class="ll-breadbar">
+    <span class="ll-bc-item">PIMS</span>
+    <span class="ll-bc-sep">›</span>
+    <span class="ll-bc-item">P&amp;ID</span>
+    <span class="ll-bc-sep">›</span>
+    <span class="ll-bc-curr">Index &amp; Documents</span>
+    <div class="ll-bc-spacer"></div>
+    <div class="ll-bc-tag" title="Declares which P&amp;IDs are expected to exist, and holds their uploaded revisions — PDF content itself isn't parsed or verified yet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span>GL / ISO Manager access</span>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="ll-main">
+    <div class="two-col">
+
+      <!-- ══ LEFT: Entry card ══ -->
+      <div class="ll-card entry-card">
+        <div class="ll-card-header">
+          <div class="ll-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ll-card-title">P&amp;ID Index &amp; Documents</div>
+            <div class="ll-card-sub">Declare P&amp;IDs, then upload their revisions</div>
+          </div>
+        </div>
+        <div class="ll-card-body">
+
+          <!-- Shared Job/Unit selector — one place, used by Import Index and
+               Add Single Row (their P&ID Name cross-checks against it), and it
+               chooses which unit the P&ID table and Uploaded indexes list show,
+               so it stays visible on every tab. Upload Documents itself needs
+               none of this — the filename alone determines Job/Unit/name. -->
+          <div id="sharedScopeBar">
+            <div class="sel-bar">
+              <div class="form-group">
+                <label class="form-label">Job No.</label>
+                <select class="form-select" id="jobSel">
+                  <option value="">— select —</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Unit No.</label>
+                <select class="form-select" id="unitSel" disabled>
+                  <option value="">— select —</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-bar" style="margin-top:1rem;">
+            <button class="tab-btn active" onclick="pmiSwitchTab('import', this)">Import Index</button>
+            <button class="tab-btn" onclick="pmiSwitchTab('manual', this)">Add Single Row</button>
+            <button class="tab-btn" onclick="pmiSwitchTab('upload', this)">Upload Documents</button>
+          </div>
+
+          <!-- ── Import tab ── -->
+          <div class="tab-pane active" id="tab-import">
+            <p class="pmi-muted" style="margin:0;">
+              Upload the <b>P&amp;ID index PDFs</b> as received from Process (several at once, e.g. all section indexes of a unit), or the Excel template. The index header's
+              Job / Unit and every Drawing No. (e.g. <strong>B862</strong>-79-41-<strong>101</strong>-11021) are checked against
+              the selection above. <b>Preview</b> shows what will change; nothing is saved until you <b>Apply</b>.
+            </p>
+
+            <a class="pmi-template-link" href="/api/pid/master-index/template">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download Excel template
+            </a>
+
+            <div class="upload-zone" id="dropZone" style="margin-top:0.9rem;" onclick="document.getElementById('filePicker').click()">
+              <svg class="upload-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+              <div class="upload-zone-title">Drop one or more P&amp;ID index PDFs / Excel files here, or click to browse</div>
+              <div class="upload-zone-sub">PDF: EIL "P &amp; ID INDEX" · Excel: Drawing No., Drawing Description, Revision, Date, Zone (optional)</div>
+              <span class="zone-file-name" id="zoneFileName" style="display:none;font-size:13px;font-weight:600;color:var(--blue-600);margin-top:8px;"></span>
+              <input type="file" id="filePicker" accept=".pdf,.xlsx,.xls,.csv" multiple style="display:none"/>
+            </div>
+
+            <div style="margin-top:1rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn btn-primary" id="importBtn" disabled onclick="pmiPreviewImport()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                Preview
+              </button>
+              <button class="btn btn-primary" id="applyBtn" style="display:none;" onclick="pmiApplyImport()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span id="applyBtnText">Apply</span>
+              </button>
+              <button class="btn btn-outline" onclick="pmiClearImport()">✕ Clear</button>
+              <span id="importSpinner" style="display:none;font-size:12.5px;color:var(--text-muted)">⏳ Reading…</span>
+            </div>
+
+            <div id="importResult"></div>
+
+            <!-- Index files uploaded for the selected Job/Unit — downloadable exactly as uploaded -->
+            <div id="issueList" class="pmi-issues"></div>
+          </div><!-- /tab-import -->
+
+          <!-- ── Manual tab ── -->
+          <div class="tab-pane" id="tab-manual">
+            <div class="form-group">
+              <label class="form-label">P&amp;ID Name *</label>
+              <input class="form-control" id="manPidName" type="text" placeholder="e.g. B378-02-42-111-11902" oninput="pmiOnNameInput()">
+              <div id="manParsePreview" class="pmi-parse-preview"></div>
+            </div>
+            <div class="form-group" style="margin-top:0.75rem;">
+              <label class="form-label">Drawing Description (optional)</label>
+              <input class="form-control" id="manDesc" type="text" placeholder="e.g. INCOMING BATTERY LIMITS">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:0.75rem;">
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">Revision (optional)</label>
+                <input class="form-control" id="manRev" type="text" maxlength="3" placeholder="e.g. 4 or A">
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">Rev. Date (optional)</label>
+                <input class="form-control" id="manRevDate" type="text" placeholder="dd.mm.yy">
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:0.75rem;">
+              <label class="form-label">Zone (optional)</label>
+              <input class="form-control" id="manZone" type="text" placeholder="e.g. Z1">
+            </div>
+            <div style="margin-top:1rem;display:flex;gap:10px;align-items:center;">
+              <button class="btn btn-primary" id="addRowBtn" disabled onclick="pmiAddRow()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Row
+              </button>
+            </div>
+            <div id="addResult"></div>
+          </div><!-- /tab-manual -->
+
+          <!-- ── Upload Documents tab — no dropdown, filename is self-sufficient ── -->
+          <div class="tab-pane" id="tab-upload">
+            <div class="pmi-convention">
+              Filename must be <b>&lt;P&amp;ID Name&gt;_&lt;Rev&gt;.pdf</b> (revision after the last underscore)<br>
+              e.g. <b>B862-79-41-101-11045_4.pdf</b> · <b>...-11048-2_0.pdf</b> · <b>...-11115A_1.pdf</b> (the older <b>..._RevA.pdf</b> form still works)<br>
+              Job No, Unit No and the P&amp;ID itself are all read from the filename and checked against the Master Index — nothing to select here.
+            </div>
+
+            <div class="upload-zone" id="pdfDropZone" style="margin-top:0.9rem;" onclick="document.getElementById('pdfFilePicker').click()">
+              <svg class="upload-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <div class="upload-zone-title">Drop P&amp;ID PDFs here or click to browse</div>
+              <div class="upload-zone-sub">Multiple files supported</div>
+              <span class="zone-file-name" id="pdfFileName" style="display:none;font-size:12.5px;font-weight:600;color:var(--blue-600);margin-top:8px;"></span>
+              <input type="file" id="pdfFilePicker" accept=".pdf" multiple style="display:none"/>
+            </div>
+
+            <div class="pmi-force-toggle" onclick="pmiToggleForce()">
+              <input type="checkbox" id="forceCheck" onclick="event.stopPropagation();pmiToggleForce()" style="margin:0;">
+              Force an older revision to become current (rare — needs a reason)
+            </div>
+            <div class="pmi-force-panel" id="forcePanel">
+              <textarea id="forceReason" placeholder="Reason this older revision should replace the current one…"></textarea>
+            </div>
+
+            <div style="margin-top:1rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn btn-primary" id="pdfUploadBtn" disabled onclick="pmiDoDocUpload()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload
+              </button>
+              <button class="btn btn-outline" onclick="pmiClearDocFiles()">✕ Clear</button>
+              <span id="pdfUploadSpinner" style="display:none;font-size:12.5px;color:var(--text-muted)">⏳ Uploading…</span>
+            </div>
+
+            <div id="docUploadResult"></div>
+          </div><!-- /tab-upload -->
+
+        </div>
+      </div><!-- /entry-card -->
+
+      <!-- ══ RIGHT: Filter + table ══ -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+
+        <div class="ll-card">
+          <div class="ll-card-body" style="padding:0.9rem 1.25rem;">
+            <div class="search-row">
+              <div class="search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input class="search-input" id="pmiSearch" type="text" placeholder="Search P&amp;ID name, job or unit…" oninput="pmiRenderTable()">
+              </div>
+              <div class="seg-control" id="statusSeg">
+                <button class="seg-btn active" data-status="active" onclick="pmiSetStatusFilter('active', this)">Active</button>
+                <button class="seg-btn" data-status="retired" onclick="pmiSetStatusFilter('retired', this)">Retired</button>
+                <button class="seg-btn" data-status="" onclick="pmiSetStatusFilter('', this)">All</button>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="pmiLoadTable()" style="flex-shrink:0;">↺ Refresh</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ll-card">
+          <div class="ll-card-body no-pad">
+            <div style="overflow-x:auto;max-height:64vh;">
+              <table class="data-table" id="pmiTable">
+                <thead id="pmiThead">
+                  <tr><th><div class="empty-state" style="padding:2.5rem;">
+                    <h3 style="font-size:15px;">Loading…</h3>
+                  </div></th></tr>
+                </thead>
+                <tbody id="pmiTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /right -->
+    </div><!-- /two-col -->
+  </main>
+
+  <!-- ═══ RETIRE MODAL ═══ -->
+  <div class="pmi-modal-overlay" id="retireOverlay">
+    <div class="pmi-modal">
+      <div class="pmi-modal-head">
+        <h3>Retire P&amp;ID <span id="retirePidName"></span>?</h3>
+        <p>It stays visible under "Retired" with full history — nothing is deleted.</p>
+      </div>
+      <div class="pmi-modal-body">
+        <textarea id="retireReason" placeholder="Reason (optional)"></textarea>
+      </div>
+      <div class="pmi-modal-foot">
+        <button class="btn btn-outline btn-sm" onclick="pmiCloseRetireModal()">Cancel</button>
+        <button class="btn btn-red btn-sm" onclick="pmiConfirmRetire()">Retire</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ UPLOAD RESULT POPUP ═══ -->
+  <div class="pmi-modal-overlay" id="uploadDoneOverlay">
+    <div class="pmi-modal">
+      <div class="pmi-modal-head">
+        <h3 id="uploadDoneTitle"></h3>
+        <p id="uploadDoneSub"></p>
+      </div>
+      <div class="pmi-modal-body" id="uploadDoneBody" style="max-height:50vh;overflow:auto;"></div>
+      <div class="pmi-modal-foot">
+        <button class="btn btn-primary btn-sm" onclick="pmiCloseUploadDone()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ REVISION HISTORY MODAL ═══ -->
+  <div class="pmi-modal-overlay" id="histOverlay">
+    <div class="pmi-modal wide">
+      <div class="pmi-modal-head">
+        <h3>Revision History — <span id="histPidName"></span></h3>
+        <button class="pmi-modal-close" onclick="pmiCloseHistory()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="pmi-modal-body no-pad" id="histBody"></div>
+    </div>
+  </div>
+
+</div>
+<script src="js/pid-index.js"></script>
+</body>
+</html>

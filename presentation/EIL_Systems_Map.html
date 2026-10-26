@@ -1,0 +1,520 @@
+<title>Systems Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+  :root{
+    --paper:#E7ECEE; --sheet:#FFFFFF; --ink:#142029; --ink-soft:#51616C; --ink-faint:#8497A0;
+    --line:#CCD6DA; --line-strong:#A6B5BB;
+    --navy:#16324A; --on-navy:#EAF0F4; --on-navy-soft:#AFC4D2;
+    --rust:#B3452A;
+    --live:#2A6B60; --live-soft:#DAEAE5;
+    --dev:#A8791E; --dev-soft:#F3E7CF;
+    --planned:#5A6B74; --planned-soft:#E3E8EA;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#11171B; --sheet:#182027; --ink:#E7ECEE; --ink-soft:#9FB0B8; --ink-faint:#647178;
+      --line:#2B363D; --line-strong:#3D4A52;
+      --navy:#0E2033; --on-navy:#EAF0F4; --on-navy-soft:#9DB6C6;
+      --rust:#E2825F;
+      --live:#6DBBA9; --live-soft:#1C332E;
+      --dev:#D9AE5C; --dev-soft:#332A18;
+      --planned:#9FAEB6; --planned-soft:#232C32;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#11171B; --sheet:#182027; --ink:#E7ECEE; --ink-soft:#9FB0B8; --ink-faint:#647178;
+    --line:#2B363D; --line-strong:#3D4A52;
+    --navy:#0E2033; --on-navy:#EAF0F4; --on-navy-soft:#9DB6C6;
+    --rust:#E2825F;
+    --live:#6DBBA9; --live-soft:#1C332E;
+    --dev:#D9AE5C; --dev-soft:#332A18;
+    --planned:#9FAEB6; --planned-soft:#232C32;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans',Arial,sans-serif;
+    display:flex; flex-direction:column;
+    min-height:100vh; padding-inline:16px;
+  }
+  h1,h2,h3{font-family:'Source Serif 4',Georgia,serif; margin:0;}
+
+  header{
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:12px;
+    padding-block:22px 8px;
+  }
+  header .brand{font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); font-weight:600;}
+  .legend{display:flex; gap:16px; flex-wrap:wrap;}
+  .legend .item{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft);}
+  .legend .dot{width:11px; height:11px; border-radius:50%; flex-shrink:0;}
+
+  main{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    padding-block:32px;
+  }
+
+  .field{position:relative; width:min(1300px,96vw); aspect-ratio:1500/1000;}
+  .connectors{position:absolute; inset:0; width:100%; height:100%; overflow:visible;}
+
+  .node{
+    position:absolute; left:50%; top:50%;
+    border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+    cursor:pointer; text-align:center; padding:12px;
+    transition:transform .15s ease, box-shadow .15s ease;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);
+  }
+  .node:hover{box-shadow:0 8px 28px rgba(0,0,0,.1);}
+  .node:focus-visible{outline:3px solid var(--rust); outline-offset:4px;}
+  .node p.name{font-family:'Source Serif 4',Georgia,serif; margin:0;}
+  .node p.tag{margin:0; line-height:1.22;}
+  .node p.cta{font-size:10px; letter-spacing:.06em; text-transform:uppercase; opacity:.7; margin-top:1px;}
+
+  .node[data-kind="hub"]{
+    width:clamp(128px,13.5vw,168px); height:clamp(128px,13.5vw,168px);
+    z-index:2; border-width:2.5px; border-style:solid;
+  }
+  .node[data-kind="hub"]:hover{transform:translate(-50%,-50%) scale(1.03);}
+  .node[data-kind="hub"].not-clickable{cursor:default;}
+  .node[data-kind="hub"].not-clickable:hover{transform:translate(-50%,-50%); box-shadow:0 4px 20px rgba(0,0,0,.06);}
+  .node[data-kind="hub"] p.name{font-size:clamp(19px,2.1vw,25px); font-weight:700;}
+  .node[data-kind="hub"] p.tag{font-size:12px; max-width:118px;}
+
+  .node[data-kind="sat"]{
+    width:clamp(78px,9vw,108px); height:clamp(78px,9vw,108px);
+    z-index:1; border-width:2px; border-style:solid;
+  }
+  .node[data-kind="sat"] p.name{font-size:13.5px; font-weight:700; line-height:1.15;}
+  .node[data-kind="sat"] p.tag{font-size:10px; max-width:82px;}
+
+  .node[data-status="live"]{background:var(--live-soft); border-color:var(--live); color:var(--live);}
+  .node[data-status="dev"]{background:var(--dev-soft); border-color:var(--dev); color:var(--dev);}
+  .node[data-status="planned"]{background:var(--planned-soft); border-color:var(--planned); color:var(--planned);}
+
+  footer{
+    padding-block:6px 22px; text-align:center;
+    font-size:12.5px; color:var(--ink-faint);
+  }
+
+  /* modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(10,16,20,.55);
+    display:flex; align-items:center; justify-content:center;
+    padding:24px; z-index:10;
+  }
+  .overlay[hidden]{display:none;}
+  .modal{
+    background:var(--sheet); border-radius:12px; width:min(880px,100%);
+    max-height:88vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 24px 64px rgba(0,0,0,.28);
+  }
+  .modal__head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
+    padding:26px 30px 18px; border-bottom:1px solid var(--line);
+  }
+  .modal__head .chip{
+    display:inline-block; font-size:11px; font-weight:600; letter-spacing:.05em;
+    padding:3px 10px; border-radius:20px; margin-bottom:8px;
+  }
+  .modal__head .chip.live{background:var(--live-soft); color:var(--live);}
+  .modal__head .chip.dev{background:var(--dev-soft); color:var(--dev);}
+  .modal__head .chip.planned{background:var(--planned-soft); color:var(--planned);}
+  .modal__head h2{font-size:26px; color:var(--ink);}
+  .modal__head button{
+    background:none; border:none; font-size:26px; line-height:1; color:var(--ink-faint);
+    cursor:pointer; padding:4px 8px; border-radius:6px; flex-shrink:0;
+  }
+  .modal__head button:hover{color:var(--ink); background:var(--paper);}
+
+  .modal__body{padding:6px 30px 10px; overflow-y:auto; flex:1;}
+  .slide{display:none; flex-direction:column; gap:16px; padding-block:18px 8px;}
+  .slide.active{display:flex;}
+  .slide .eyebrow{font-size:12.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--rust);}
+  .slide p.lead{font-size:17px; line-height:1.6; color:var(--ink-soft); max-width:64ch; margin:0;}
+  .slide ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
+  .slide ul li{display:flex; gap:12px; font-size:16px; line-height:1.5; color:var(--ink-soft);}
+  .slide ul li::before{content:""; flex:0 0 7px; width:7px; height:7px; margin-top:8px; border-radius:50%; background:var(--rust);}
+  .grid9{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:4px;}
+  .grid9 div{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:10px 12px; font-size:13.5px; color:var(--ink); line-height:1.3;}
+  .grid9 div b{color:var(--rust); font-family:'IBM Plex Sans'; display:block; font-size:11px; margin-bottom:3px;}
+  .stat-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:6px;}
+  .stat{flex:1; min-width:150px; border:1px dashed var(--line-strong); border-radius:8px; padding:16px;}
+  .stat .v{font-size:15px; font-weight:600; color:var(--ink-faint);}
+  .stat .l{font-size:13px; color:var(--ink-soft); margin-top:4px; line-height:1.35;}
+
+  .modal__foot{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding:16px 30px 24px;
+  }
+  .dots{display:flex; gap:8px;}
+  .dots button{
+    width:9px; height:9px; border-radius:50%; border:none; background:var(--line-strong);
+    cursor:pointer; padding:0;
+  }
+  .dots button.active{background:var(--rust); width:22px; border-radius:5px;}
+  .navbtns{display:flex; gap:10px;}
+  .navbtns button{
+    font-family:'IBM Plex Sans'; font-size:13.5px; font-weight:600; letter-spacing:.02em;
+    border:1px solid var(--line-strong); background:var(--sheet); color:var(--ink);
+    padding:9px 18px; border-radius:6px; cursor:pointer;
+  }
+  .navbtns button:hover{background:var(--paper);}
+  .navbtns button:disabled{opacity:.35; cursor:default;}
+  .navbtns button.primary{background:var(--rust); border-color:var(--rust); color:#fff;}
+  .navbtns button.primary:hover{opacity:.92; background:var(--rust);}
+
+  @media (max-width:600px){
+    .modal__head, .modal__body, .modal__foot{padding-left:20px; padding-right:20px;}
+    .grid9{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+
+<header>
+  <p class="brand">EIL &middot; Piping Engineering Systems</p>
+  <div class="legend">
+    <span class="item"><span class="dot" style="background:var(--live)"></span>Fully developed</span>
+    <span class="item"><span class="dot" style="background:var(--dev)"></span>Under development</span>
+    <span class="item"><span class="dot" style="background:var(--planned)"></span>Planned</span>
+  </div>
+</header>
+
+<main>
+  <div class="field" id="field">
+    <svg class="connectors" id="connectors" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+  </div>
+</main>
+
+<footer id="progress-note"></footer>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal__head">
+      <div>
+        <span class="chip" id="modal-chip"></span>
+        <h2 id="modal-title"></h2>
+      </div>
+      <button id="close-btn" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="modal__body" id="modal-body"></div>
+
+    <div class="modal__foot">
+      <div class="dots" id="dots"></div>
+      <div class="navbtns">
+        <button id="prev-btn">Back</button>
+        <button id="next-btn" class="primary">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  var STATUS_LABEL = { live:'FULLY DEVELOPED', dev:'UNDER DEVELOPMENT', planned:'PLANNED' };
+
+  /* Coordinates are hand-placed in a 1500x760 reference frame, then
+     converted to percentages so the layout scales without recomputation. */
+  var W = 1500, H = 1000;
+  function pct(px, total){ return (px / total) * 100; }
+
+  var NODES = [
+    {
+      id:'pims', kind:'hub', status:'live', clickable:true, connectTo:'km', x:280, y:620,
+      name:'PIMS', tag:'ISO / GAD / P&ID workflow backbone',
+      title:'PIMS &mdash; ISO / GAD / P&ID Workflow Backbone',
+      slides:[
+        {
+          eyebrow:'The Problem',
+          html:'<p class="lead">Every job ran the same drawing lifecycle &mdash; model, check, clear, issue &mdash; but nothing tracked it as one workflow. Each step lived in its own file, its own email thread, or someone\'s memory.</p>'
+            + '<ul>'
+            + '<li>Drawing review handed off by email &mdash; no visibility into whose desk a line was sitting on</li>'
+            + '<li>Vendor line lists reconciled by hand, one spreadsheet at a time</li>'
+            + '<li>Stress-critical lines tracked informally, easy to miss when stress data changed</li>'
+            + '<li>Clash reports cross-checked against drawings manually, line by line</li>'
+            + '<li>No single place to see where a job actually stood</li>'
+            + '</ul>'
+        },
+        {
+          eyebrow:'What We Built',
+          html:'<p class="lead">One shared database and drawing-clearance engine that every other system on this map reads from or feeds into. Nine modules, in production today.</p>'
+            + '<div class="grid9">'
+            + '<div><b>01</b>ISO Workflow Engine</div>'
+            + '<div><b>02</b>GL / SGL Control Console</div>'
+            + '<div><b>03</b>GAD Workflow &amp; Lot Issuance</div>'
+            + '<div><b>04</b>P&amp;ID Indexing &amp; Intelligence</div>'
+            + '<div><b>05</b>Line List Suite</div>'
+            + '<div><b>06</b>Clash Detection Tracking</div>'
+            + '<div><b>07</b>Reporting &amp; Analytics</div>'
+            + '<div><b>08</b>Dashboard / Gateway</div>'
+            + '<div><b>09</b>Automated Data Ingestion</div>'
+            + '</div>'
+        },
+        {
+          eyebrow:'Time &amp; Cost Savings',
+          html:'<p class="lead">Figures below are placeholders &mdash; to be confirmed with real production numbers before this is presented.</p>'
+            + '<div class="stat-row">'
+            + '<div class="stat"><div class="v">&mdash;</div><div class="l">Faster ISO clearance cycle vs. manual hand-off</div></div>'
+            + '<div class="stat"><div class="v">&mdash;</div><div class="l">Hours saved per week compiling status reports</div></div>'
+            + '<div class="stat"><div class="v">&mdash;</div><div class="l">Rework avoided from automatic stress-critical flagging</div></div>'
+            + '<div class="stat"><div class="v">&#8377;&mdash;</div><div class="l">Estimated cost avoided vs. vendor software</div></div>'
+            + '</div>'
+        }
+      ]
+    },
+    {
+      id:'srms', kind:'sat', status:'live', connectTo:'pims', x:150, y:415,
+      name:'SRMS', tag:'Stress system tracking',
+      title:'SRMS &mdash; Stress System Real-Time Tracking',
+      slides:[
+        { eyebrow:'The Problem', html:'<p class="lead">Stress systems were allocated to engineers manually, with no real track of how much of each system had actually been completed.</p>' },
+        { eyebrow:'What We Built', html:'<p class="lead">Opening SRMS, the Stress Lead sees every stress system already defined in PIMS and allocates it directly from there. Once allocated, Job Engineers log in and see exactly how many systems are assigned to them &mdash; each with a step-by-step completion bar, so progress is tracked in real time instead of by asking around.</p>' }
+      ]
+    },
+    {
+      id:'ssms', kind:'sat', status:'live', connectTo:'srms', x:60, y:320,
+      name:'SSMS', tag:'Spring tagging & MR index',
+      title:'SSMS &mdash; Spring Tagging &amp; MR Index',
+      slides:[
+        { eyebrow:'The Problem', html:'<p class="lead">Spring tags and material requisitions used to be tracked in a shared Excel file &mdash; it went stale quickly, and duplicate spring tag numbers routinely slipped through undetected.</p>' },
+        { eyebrow:'What We Built', html:'<p class="lead">A Stress Engineer opens SSMS and sees every stress-critical line already defined in PIMS. They allocate a spring against the line that needs one, and SSMS issues the next spring tag number automatically, in real time &mdash; so no two springs can ever collide. Approved springs are grouped into an MR (Material Requisition) index and exported straight into EIL\'s spring schedule for procurement. When vendor bid and purchase-order data comes back, it\'s recorded against that same spring tag, so Job Engineers can back-check the vendor\'s actual spring against what was originally specified.</p>' }
+      ]
+    },
+    {
+      id:'specialsketch', kind:'sat', status:'live', connectTo:'srms', x:60, y:510,
+      name:'Special Sketch', tag:'Special support registry',
+      title:'Special Sketch &mdash; Special Support Registry',
+      slides:[
+        { eyebrow:'The Problem', html:'<p class="lead">There was no consolidated repository of every special support the company has made across jobs over time &mdash; each one existed only inside its own job\'s files, disconnected from the rest.</p>' },
+        { eyebrow:'What We Built', html:'<p class="lead">Special Sketch brings every special support ever made into one portal, and that history is used to standardize new ones &mdash; so dependence on creating a brand-new special support keeps shrinking, job over job.</p>' }
+      ]
+    },
+    {
+      id:'ipmcs', kind:'sat', status:'planned', connectTo:'pims', x:150, y:825,
+      name:'IPMCS Utility', tag:'MTO consolidation & ISO BOM check',
+      title:'IPMCS Utility &mdash; MTO Consolidation &amp; Real-Time ISO BOM Check',
+      slides:[
+        { eyebrow:'The Problem', html:'<p class="lead">MTO is taken manually into a BOM sheet, or entered directly into IPMCS &mdash; either way, there\'s no record of who owns which line\'s entry. Even after an MTO dump is uploaded and allocated to people for checking, there\'s still no record of who actually checked which line. And before any dump can be uploaded at all, it goes through a long manual error-resolution process outside any system.</p>' },
+        { eyebrow:'What We&rsquo;re Building', html:'<p class="lead">IPMCS Utility brings that entire error-resolution process into one portal, with every insertion and every check attributed to the person who did it. Once a dump clears, a report is extracted and pushed straight into IPMCS &mdash; consolidating MTO end to end, with real ownership at every step, and enabling real-time checking of the ISO BOM.</p>' }
+      ]
+    },
+    {
+      id:'specialitem', kind:'sat', status:'dev', connectTo:'ipmcs', extraLinks:['pims'], x:60, y:910,
+      name:'Special Item Module', tag:'P&ID special items, hyperlinked',
+      title:'Special Item Module &mdash; Hyperlinked P&amp;ID Special Items',
+      slides:[
+        { eyebrow:'The Problem', html:'<p class="lead">Every special item from the P&amp;ID used to be gathered into an Excel sheet &mdash; and that sheet went stale or went missing from time to time.</p>' },
+        { eyebrow:'What We&rsquo;re Building', html:'<p class="lead">Each special item gets hyperlinked directly on the P&amp;ID itself, and an Excel report can be extracted with a snapshot of the item attached. Schedule indexes are prepared straight from this module. Later, once drawings come back from the vendor, they\'ll be shown to the Zone Engineer through this same module.</p>' }
+      ]
+    },
+    {
+      id:'3dmodel', kind:'hub', status:'live', clickable:false, connectTo:'km', x:1220, y:620,
+      name:'3D Modelling', tag:'Works both ways with PIMS'
+    },
+    {
+      id:'mrcs', kind:'sat', status:'live', connectTo:'3dmodel', x:1390, y:380,
+      name:'MRCS', tag:'Model review tag closure',
+      title:'MRCS &mdash; Model Review Tag Closure',
+      slides:[ { eyebrow:'Coming Up', html:'<p class="lead">Problem, solution and benefit for MRCS will be added here next.</p>' } ]
+    },
+    {
+      id:'pscp', kind:'sat', status:'live', connectTo:'3dmodel', x:1390, y:540,
+      name:'PSCP', tag:'Piping–structural coordination',
+      title:'PSCP &mdash; Piping–Structural Joint Coordination',
+      slides:[ { eyebrow:'Coming Up', html:'<p class="lead">Problem, solution and benefit for PSCP will be added here next.</p>' } ]
+    },
+    {
+      id:'modadmin', kind:'sat', status:'live', connectTo:'3dmodel', x:1390, y:700,
+      name:'Modeller–Admin Interaction', tag:'Fixing workflow friction',
+      title:'Modeller–Admin Interaction',
+      slides:[ { eyebrow:'Coming Up', html:'<p class="lead">Problem, solution and benefit for this module will be added here next.</p>' } ]
+    },
+    {
+      id:'modoutput', kind:'sat', status:'live', connectTo:'3dmodel', x:1390, y:860,
+      name:'Modeller Output Tracking', tag:'Daily screen vs. idle time',
+      title:'Modeller Output Tracking',
+      slides:[ { eyebrow:'Coming Up', html:'<p class="lead">Problem, solution and benefit for this module will be added here next.</p>' } ]
+    },
+    {
+      id:'docreview', kind:'hub', status:'live', clickable:true, connectTo:'km', x:600, y:620,
+      name:'Document Review Portal', tag:'Cross-department docs, one click',
+      title:'Document Review Portal',
+      slides:[ { eyebrow:'Coming Up', html:'<p class="lead">Problem, solution and benefit for the Document Review Portal will be added here next.</p>' } ]
+    },
+    {
+      id:'layoutopt', kind:'hub', status:'dev', clickable:true, connectTo:'km', x:900, y:620,
+      name:'Layout Preparation Optimization', tag:'Drafting efficiency for layouts',
+      title:'Layout Preparation Optimization',
+      slides:[ { eyebrow:'Coming Up', html:'<p class="lead">Problem, solution and benefit for Layout Preparation Optimization will be added here next.</p>' } ]
+    },
+    {
+      id:'km', kind:'hub', status:'dev', clickable:true, x:750, y:120,
+      name:'EIL Knowledge Management', tag:'Cross-departmental document Q&A (RAG)',
+      title:'EIL Knowledge Management',
+      slides:[ { eyebrow:'Coming Up', html:'<p class="lead">Problem, solution and benefit for EIL Knowledge Management will be added here next.</p>' } ]
+    }
+  ];
+
+  var field = document.getElementById('field');
+  var svg = document.getElementById('connectors');
+  var overlay = document.getElementById('overlay');
+  var closeBtn = document.getElementById('close-btn');
+  var prevBtn = document.getElementById('prev-btn');
+  var nextBtn = document.getElementById('next-btn');
+  var dotsWrap = document.getElementById('dots');
+  var modalChip = document.getElementById('modal-chip');
+  var modalTitle = document.getElementById('modal-title');
+  var modalBody = document.getElementById('modal-body');
+  var progressNote = document.getElementById('progress-note');
+
+  var current = 0;
+  var activeSlides = [];
+  var lastFocused = null;
+
+  function svgEl(tag, attrs){
+    var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  function buildField(){
+    var points = {};
+
+    var defs = svgEl('defs', {});
+    ['start','end'].forEach(function(kind){
+      var marker = svgEl('marker', {
+        id: 'arrow-' + kind, viewBox: '0 0 10 10', refX: 5, refY: 5,
+        markerWidth: 2.6, markerHeight: 2.6, markerUnits: 'userSpaceOnUse',
+        orient: kind === 'end' ? 'auto' : 'auto-start-reverse'
+      });
+      marker.appendChild(svgEl('path', { d:'M0,0 L10,5 L0,10 z', style:'fill:var(--ink-faint)' }));
+      defs.appendChild(marker);
+    });
+    svg.appendChild(defs);
+
+    NODES.forEach(function(node){
+      points[node.id] = { x: pct(node.x, W), y: pct(node.y, H) };
+    });
+
+    NODES.forEach(function(node){
+      var pt = points[node.id];
+
+      if (node.connectTo && points[node.connectTo]){
+        var parentPt = points[node.connectTo];
+        var lineStyle = 'stroke:var(--line-strong); stroke-width:0.5px; vector-effect:non-scaling-stroke';
+        if (node.bidirectional) lineStyle += '; marker-start:url(#arrow-start); marker-end:url(#arrow-end)';
+        svg.appendChild(svgEl('line', {
+          x1: parentPt.x, y1: parentPt.y, x2: pt.x, y2: pt.y, style: lineStyle
+        }));
+      }
+      (node.extraLinks || []).forEach(function(extraId){
+        var extraPt = points[extraId];
+        if (!extraPt) return;
+        svg.appendChild(svgEl('line', {
+          x1: extraPt.x, y1: extraPt.y, x2: pt.x, y2: pt.y,
+          style: 'stroke:var(--line-strong); stroke-width:0.4px; stroke-dasharray:1.4,1.4; vector-effect:non-scaling-stroke'
+        }));
+      });
+
+      var el = document.createElement('div');
+      el.className = 'node';
+      el.dataset.kind = node.kind;
+      el.dataset.status = node.status;
+      el.dataset.id = node.id;
+      el.style.left = pt.x + '%';
+      el.style.top = pt.y + '%';
+      el.style.transform = 'translate(-50%,-50%)';
+
+      var inner = '<p class="name">' + node.name + '</p><p class="tag">' + node.tag + '</p>';
+      if (node.kind === 'hub' && node.clickable) inner += '<p class="cta">Click to explore</p>';
+      el.innerHTML = inner;
+
+      if (node.clickable === false){
+        el.classList.add('not-clickable');
+        field.appendChild(el);
+      } else {
+        el.setAttribute('role','button');
+        el.setAttribute('tabindex','0');
+        el.setAttribute('aria-haspopup','dialog');
+        field.appendChild(el);
+        wireNode(el, node);
+      }
+    });
+  }
+
+  function wireNode(el, node){
+    el.addEventListener('click', function(){ openModal(node); });
+    el.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openModal(node); }
+    });
+  }
+
+  function renderDots(){
+    dotsWrap.innerHTML = '';
+    activeSlides.forEach(function(_, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      b.addEventListener('click', function(){ goTo(i); });
+      dotsWrap.appendChild(b);
+    });
+  }
+
+  function render(){
+    var dotEls = Array.prototype.slice.call(dotsWrap.children);
+    dotEls.forEach(function(d, i){ d.classList.toggle('active', i === current); });
+    Array.prototype.slice.call(modalBody.children).forEach(function(s, i){
+      s.classList.toggle('active', i === current);
+    });
+    prevBtn.disabled = current === 0;
+    nextBtn.textContent = current === activeSlides.length - 1 ? 'Done' : 'Next';
+  }
+  function goTo(i){ current = i; render(); }
+
+  function openModal(node){
+    lastFocused = document.activeElement;
+    activeSlides = node.slides;
+    current = 0;
+    modalChip.textContent = STATUS_LABEL[node.status];
+    modalChip.className = 'chip ' + node.status;
+    modalTitle.innerHTML = node.title;
+    modalBody.innerHTML = '';
+    activeSlides.forEach(function(sl){
+      var d = document.createElement('div');
+      d.className = 'slide';
+      d.innerHTML = '<p class="eyebrow">' + sl.eyebrow + '</p>' + sl.html;
+      modalBody.appendChild(d);
+    });
+    renderDots();
+    render();
+    overlay.hidden = false;
+    closeBtn.focus();
+    document.addEventListener('keydown', onKey);
+  }
+  function closeModal(){
+    overlay.hidden = true;
+    document.removeEventListener('keydown', onKey);
+    if (lastFocused) lastFocused.focus();
+  }
+  function onKey(e){
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'ArrowRight') nextBtn.click();
+    if (e.key === 'ArrowLeft') prevBtn.click();
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
+  prevBtn.addEventListener('click', function(){ if (current > 0) goTo(current - 1); });
+  nextBtn.addEventListener('click', function(){
+    if (current < activeSlides.length - 1) goTo(current + 1); else closeModal();
+  });
+
+  buildField();
+
+  var moduleCount = NODES.filter(function(n){ return n.kind === 'sat'; }).length;
+  progressNote.textContent = moduleCount + ' of 13 modules connected · more join this map as each is detailed';
+})();
+</script>

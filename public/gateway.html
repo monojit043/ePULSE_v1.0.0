@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EIL Piping Division — Gateway</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- DM Sans loaded with the exact same weight/optical-size range as
+       user.html (300–700 + italic) — the userstyle sheet uses font-weight
+       600/700 in several places, and without those weights present here
+       the browser was synthetically faking bold onto whatever weight *was*
+       loaded, which read as "not really matching" even though the CSS
+       itself already pointed at DM Sans. Rajdhani/JetBrains Mono kept
+       loaded too, unused by the new theme but still needed if reverting
+       to css/gateway.css. -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <!-- Styled to match user.html's "Blue & White" vibe. To revert to the
+       original dark-HUD look, change this href back to css/gateway.css —
+       that file is untouched, kept only as the pre-restyle fallback. -->
+  <link rel="stylesheet" href="css/gateway-userstyle.css" />
+  <!-- Real, live notification system — shared with user.html/hod.html/sgl.html/dashboard.html -->
+  <link rel="stylesheet" href="css/notifications.css" />
+</head>
+
+<body>
+
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <div class="layout" id="layout">
+
+    <!-- ══ SIDEBAR ═══════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sb-logo">
+        <div class="logo-icon">
+          <img src="images/eilround.gif" alt="EIL" />
+        </div>
+        <div class="logo-text">
+          <span class="logo-main">Piping Gateway</span>
+          <span class="logo-sub">Engineers India Limited</span>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">SYSTEMS</div>
+        <div class="sys-list">
+
+          <div class="sys-group-label">PIMS &amp; Utilities</div>
+          <a class="sys-subitem" href="/" data-same-host-port="3400" data-path="/index.html" target="_blank">PIMS - Piping Isometrics Management System</a>
+          <a class="sys-subitem" href="ll-create.html" target="_blank">Create Piping Line List</a>
+          <a class="sys-subitem" href="ll-normalize.html" target="_blank">Line List Normalizer</a>
+          <a class="sys-subitem" href="ll-search.html" target="_blank">Search Line Data</a>
+          <a class="sys-subitem" href="ll-lms.html" target="_blank">Line Mounted Summary</a>
+          <a class="sys-subitem" href="inch-upload.html" target="_blank">INCH Data Upload</a>
+          <a class="sys-subitem" href="/" data-same-host-port="3400" data-path="/report.html" target="_blank">Generate Report</a>
+
+          <div class="sys-group-label">P&amp;ID</div>
+          <a class="sys-subitem" href="pid-view.html" target="_blank">P&amp;IDs</a>
+          <a class="sys-subitem" href="pid-index.html" target="_blank">P&amp;ID Index &amp; Documents</a>
+
+          <div class="sys-group-label">MTO Consolidation System</div>
+          <a class="sys-subitem" href="/" data-same-host-port="8090" data-path="/index.html" target="_blank">MTO Collection and Consolidation</a>
+
+          <div class="sys-group-label">Stress Analysis</div>
+          <a class="sys-subitem" href="/" data-same-host-port="4000" data-path="/Login.html" target="_blank">SSMS - Spring Schedule Management System</a>
+          <a class="sys-subitem" href="/" data-same-host-port="3400" data-path="/ll-stress.html" target="_blank">Stress Critical Line List Prep</a>
+          <a class="sys-subitem" href="http://10.40.1.144:5000" target="_blank">Special Supports Database</a>
+          <!-- <span class="sys-subitem sys-subitem--soon" title="Not yet available">Special Supports Database</span> -->
+          <span class="sys-subitem sys-subitem--soon" title="Not yet available">Special Supports Sketch Prep</span>
+
+          <div class="sys-group-label">Model and Model Review</div>
+          <a class="sys-subitem" href="http://10.40.36.130:5500/login.html" target="_blank">MPLR - 3D Model Problem Log Register</a>
+          <a class="sys-subitem" href="/" data-same-host-port="5500" data-path="/login.html" target="_blank">MRCS - Model Review and Coordination System</a>
+
+          <div class="sys-group-label">Coordination with Other Department</div>
+          <a class="sys-subitem" href="http://10.40.36.130:5500/login.html" target="_blank">PSCP - Piping Structural Coordination</a>
+          <a class="sys-subitem" href="clash-upload.html" target="_blank">Clash Report Upload</a>
+
+          <div class="sys-group-label">Document Review Portal (DRP)</div>
+          <span class="sys-subitem sys-subitem--soon" title="Not yet available">DRP - Yet to be Built</span>
+
+          <div class="sys-group-label">GAD</div>
+          <a class="sys-subitem" href="/gad.html" target="_blank">GAD - General Arrangement Drawing</a>
+
+          <div class="sys-item sys-item--add" title="Add another system">
+            <span class="sys-add-icon">+</span>
+            <span class="sys-name">Add Application</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">NETWORK</div>
+        <div class="sb-info-row">
+          <span class="sb-info-key">SUBNET</span>
+          <span class="sb-info-val">10.40.36.232</span>
+        </div>
+        <div class="sb-info-row">
+          <span class="sb-info-key">PROTOCOL</span>
+          <span class="sb-info-val">HTTP / LAN</span>
+        </div>
+        <div class="sb-info-row">
+          <span class="sb-info-key">ACCESS</span>
+          <span class="sb-info-val">Internal Only</span>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">DIVISION</div>
+        <div class="sb-info-row">
+          <span class="sb-info-key">UNIT</span>
+          <span class="sb-info-val">EPC — Piping Eng.</span>
+        </div>
+        <div class="sb-info-row">
+          <span class="sb-info-key">PORTAL</span>
+          <span class="sb-info-val">v1.0</span>
+        </div>
+        <div class="sb-info-row">
+          <span class="sb-info-key">SYSTEMS</span>
+          <span class="sb-info-val" id="sysCount">8 Registered</span>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">SHORTCUTS</div>
+        <div class="shortcut-row">
+          <span class="kbd">1</span>
+          <span class="kbd">2</span>
+          <span class="kbd">3</span>
+          <span class="kbd">4</span>
+          <span class="kbd">5</span>
+          <span class="kbd">6</span>
+          <span class="shortcut-desc">Quick launch app</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="kbd">Ctrl</span>
+          <span class="kbd">K</span>
+          <span class="shortcut-desc">Search / jump to view</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="kbd">ESC</span>
+          <span class="shortcut-desc">Close overlay</span>
+        </div>
+      </div>
+
+      <div class="sb-foot">
+        <div class="sb-status">
+          <span class="status-dot"></span>
+          <span class="sb-status-text">SYSTEM ONLINE</span>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Mobile sidebar backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ══ BODY SHELL ═══════════════════════════════
+         Topbar + the content/info-rail/icon-rail row, kept separate from
+         .sidebar so the topbar spans only this area (not over the
+         sidebar) — the sidebar stays a true full-height column from the
+         very top, unlike the two right-hand rails which sit below the
+         topbar. -->
+    <div class="body-shell">
+
+      <header class="topbar">
+        <button class="icon-btn sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
+
+        <div class="portal-label">
+          <svg class="portal-label-icon" width="16" height="16" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="2" width="10" height="10" rx="1" fill="var(--accent)" />
+            <rect x="16" y="2" width="10" height="10" rx="1" fill="var(--accent)" opacity="0.5" />
+            <rect x="2" y="16" width="10" height="10" rx="1" fill="var(--accent)" opacity="0.5" />
+            <rect x="16" y="16" width="10" height="10" rx="1" fill="var(--accent)" />
+          </svg>
+          <span>PIPING DIVISION — GATEWAY</span>
+        </div>
+
+        <div class="topbar-search" id="topbarSearch">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+          <input type="text" id="globalSearchInput" placeholder="Search lines, line items, MDS documents, projects…"
+            autocomplete="off">
+          <span class="search-kbd-hint" aria-hidden="true"><kbd>Ctrl</kbd><span
+              class="search-kbd-plus">+</span><kbd>K</kbd></span>
+          <div class="search-dropdown" id="searchDropdown">
+            <!-- Views quick-switch — the one real, wired-up section of this
+                   dropdown (everything below it is still a placeholder). Lets
+                   Ctrl/Cmd+K double as a jump-to-view command palette. -->
+            <div class="search-cat">
+              <div class="search-cat-head">
+                <svg viewBox="0 0 16 16" fill="none">
+                  <path d="M3 3h4v4H3V3zM9 3h4v4H9V3zM3 9h4v4H3V9zM9 9h4v4H9V9z" stroke="currentColor"
+                    stroke-width="1.5" stroke-linejoin="round" />
+                </svg>
+                Views
+              </div>
+              <div class="search-view-list" id="searchViewList">
+                <button type="button" class="search-view-item" data-view="progress">Progress Summary</button>
+                <button type="button" class="search-view-item" data-view="pending">Pending Works</button>
+                <button type="button" class="search-view-item" data-view="monitoring">Monitoring</button>
+              </div>
+            </div>
+            <div class="search-cat">
+              <div class="search-cat-head">
+                <svg viewBox="0 0 16 16" fill="none">
+                  <path d="M2 8h12M2 4h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+                Lines
+              </div>
+              <div class="search-cat-empty">Not connected yet</div>
+            </div>
+            <div class="search-cat">
+              <div class="search-cat-head">
+                <svg viewBox="0 0 16 16" fill="none">
+                  <rect x="2.5" y="2.5" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                  <path d="M5 6h6M5 8.5h6M5 11h3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                </svg>
+                Line Items
+              </div>
+              <div class="search-cat-empty">Not connected yet</div>
+            </div>
+            <div class="search-cat">
+              <div class="search-cat-head">
+                <svg viewBox="0 0 16 16" fill="none">
+                  <path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                  <path d="M9 2v3h3" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                </svg>
+                MDS Documents
+              </div>
+              <div class="search-cat-empty">Not connected yet</div>
+            </div>
+            <div class="search-dropdown-foot">Global search — connected one data source at a time</div>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn theme-toggle" id="themeToggle" title="Toggle light / dark">
+            <svg class="icon-moon" width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <path d="M13.5 9.5A6 6 0 0 1 6.5 2.5a6 6 0 1 0 7 7z" fill="currentColor" />
+            </svg>
+            <svg class="icon-sun" width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" />
+              <path
+                d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.42 1.42M11.18 11.18l1.42 1.42M3.4 12.6l1.42-1.42M11.18 4.82l1.42-1.42"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </button>
+
+          <!-- Real, live notifications — same SSE-based system user.html/
+               hod.html/sgl.html/dashboard.html already share (js/notifications.js
+               + css/notifications.css). #notifBell/#notifBadge/#notifPanel/
+               #notifOverlay/#notifList/#notifClose/#notifMarkAll ids are its
+               fixed contract; do not rename them. -->
+          <button class="icon-btn" id="notifBell" title="Notifications">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M8 1.5c-2 0-3.5 1.6-3.5 3.6v2.3c0 .5-.2 1-.5 1.4L3 10.2c-.5.6-.1 1.5.7 1.5h8.6c.8 0 1.2-.9.7-1.5l-1-1.4c-.3-.4-.5-.9-.5-1.4V5.1C11.5 3.1 10 1.5 8 1.5z"
+                stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+              <path d="M6.5 13.2a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+          </button>
+          <button class="icon-btn" id="chatBtn" title="Messages">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <path d="M2 3.5h12v7.5a1 1 0 0 1-1 1H6l-3 2.5v-2.5H3a1 1 0 0 1-1-1v-7.5z" stroke="currentColor"
+                stroke-width="1.3" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <!-- Real session identity (name + roles from /api/me), replacing
+                 the old plain clock. Sign out here calls the same /api/logout
+                 the sidebar's logout button already uses. -->
+          <div class="topbar-profile" id="topbarProfile">
+            <button type="button" class="topbar-profile-btn" id="topbarProfileBtn">
+              <span class="topbar-profile-avatar">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.4" />
+                  <path d="M2 13.5c0-2.5 2.7-4 6-4s6 1.5 6 4" stroke="currentColor" stroke-width="1.4"
+                    stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="topbar-profile-text">
+                <span class="topbar-profile-name" id="topbarUserName">…</span>
+                <span class="topbar-profile-role" id="topbarUserRole">…</span>
+              </span>
+              <svg class="topbar-profile-chevron" width="10" height="10" viewBox="0 0 16 16" fill="none">
+                <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </button>
+            <div class="topbar-profile-menu" id="topbarProfileMenu">
+              <button type="button" class="topbar-profile-menu-item" id="gwChangePasswordBtn">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                  <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4" />
+                  <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.4"
+                    stroke-linecap="round" />
+                </svg>
+                Change Password
+              </button>
+              <button type="button" class="topbar-profile-menu-item" id="topbarLogoutBtn">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M11 11l3-3-3-3M14 8H6" stroke="currentColor"
+                    stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="body-row">
+
+        <!-- ══ CONTENT ════════════════════════════════ -->
+        <div class="content">
+
+          <!-- Main -->
+          <main class="main">
+            <div class="main-primary">
+
+              <div class="hero-section">
+                <div class="hero-row">
+                  <div class="hero-text">
+                    <h1 class="hero-title" id="viewHeroTitle">Good <span id="heroGreetPeriod">Afternoon</span>, <span
+                        id="heroGreetName">there</span>! <span class="hero-wave">👋</span></h1>
+                    <p class="hero-sub" id="viewHeroSub">Here's what's happening with your projects today.</p>
+                  </div>
+                  <!-- Project/Unit filters — static placeholder (no real project list
+                         wired up), only shown on the Progress view (see gateway.js
+                         setView). Genuinely disabled, not just styled to look inactive —
+                         same discipline as the AI Assistant panel. The "View Project
+                         Dashboard" button that used to sit here was dropped when
+                         compacting this row — it didn't link anywhere real anyway. -->
+                  <div class="hero-filters active" id="heroFilters">
+                    <label class="hero-filter">
+                      <span class="hero-filter-label">Project</span>
+                      <select class="hero-filter-select" disabled title="Not connected yet">
+                        <option>All Projects</option>
+                      </select>
+                    </label>
+                    <label class="hero-filter">
+                      <span class="hero-filter-label">Unit</span>
+                      <select class="hero-filter-select" disabled title="Not connected yet">
+                        <option>All Units</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+                <div class="hero-line"></div>
+              </div>
+
+              <div class="view-panel active" id="view-progress" data-view="progress">
+
+                <!-- Highlight cards — the 6 headline metrics, promoted out of the
+                     old flat status-strip into bigger cards with icon + fraction +
+                     trend delta (matching the reference dashboard). Values/deltas
+                     are the same arbitrary demo numbers used throughout this page
+                     (see revealDemoData in gateway.js) — not a new data source. -->
+                <div class="kpi-highlight-row" id="kpiHighlightRow">
+                  <div class="kpi-highlight-card" data-metric="iso-issued">
+                    <div class="kpi-highlight-text">
+                      <span class="kpi-highlight-label">ISO Issued</span>
+                      <span class="kpi-highlight-value" id="hl-iso-issued-value">—</span>
+                      <span class="kpi-highlight-sub" id="hl-iso-issued-sub">Awaiting data feed…</span>
+                    </div>
+                    <span class="kpi-highlight-icon icon-green">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+                        <path d="M9 2v3h3" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="kpi-highlight-card" data-metric="line-modelling">
+                    <div class="kpi-highlight-text">
+                      <span class="kpi-highlight-label">Modelled</span>
+                      <span class="kpi-highlight-value" id="hl-line-modelling-value">—</span>
+                      <span class="kpi-highlight-sub" id="hl-line-modelling-sub">Awaiting data feed…</span>
+                    </div>
+                    <span class="kpi-highlight-icon icon-amber">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 1.5l6 3.2v6.6L8 14.5l-6-3.2V4.7L8 1.5z" stroke="currentColor" stroke-width="1.4"
+                          stroke-linejoin="round" />
+                        <path d="M2 4.7L8 8l6-3.3M8 8v6.5" stroke="currentColor" stroke-width="1.4"
+                          stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="kpi-highlight-card" data-metric="ppms">
+                    <div class="kpi-highlight-text">
+                      <span class="kpi-highlight-label">PPMS</span>
+                      <span class="kpi-highlight-value" id="hl-ppms-value">—</span>
+                      <span class="kpi-highlight-sub" id="hl-ppms-sub">Awaiting data feed…</span>
+                    </div>
+                    <span class="kpi-highlight-icon icon-accent">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                        <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" stroke="currentColor" stroke-width="1.4"
+                          stroke-linecap="round" />
+                        <path d="M13.5 2v3.2h-3.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
+                          stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="kpi-highlight-card" data-metric="gad">
+                    <div class="kpi-highlight-text">
+                      <span class="kpi-highlight-label">GAD</span>
+                      <span class="kpi-highlight-value" id="hl-gad-value">—</span>
+                      <span class="kpi-highlight-sub" id="hl-gad-sub">Awaiting data feed…</span>
+                    </div>
+                    <span class="kpi-highlight-icon icon-purple">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                        <rect x="2" y="2" width="5" height="5" rx="1" />
+                        <rect x="9" y="2" width="5" height="5" rx="1" opacity="0.5" />
+                        <rect x="2" y="9" width="5" height="5" rx="1" opacity="0.5" />
+                        <rect x="9" y="9" width="5" height="5" rx="1" />
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="kpi-highlight-card" data-metric="nozzle">
+                    <div class="kpi-highlight-text">
+                      <span class="kpi-highlight-label">Nozzle Orient.</span>
+                      <span class="kpi-highlight-value" id="hl-nozzle-value">—</span>
+                      <span class="kpi-highlight-sub" id="hl-nozzle-sub">Awaiting data feed…</span>
+                    </div>
+                    <span class="kpi-highlight-icon icon-amber">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4" />
+                        <circle cx="8" cy="8" r="2.6" stroke="currentColor" stroke-width="1.4" />
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="kpi-highlight-card" data-metric="clip-drawings">
+                    <div class="kpi-highlight-text">
+                      <span class="kpi-highlight-label">Clip Drawings</span>
+                      <span class="kpi-highlight-value" id="hl-clip-drawings-value">—</span>
+                      <span class="kpi-highlight-sub" id="hl-clip-drawings-sub">Awaiting data feed…</span>
+                    </div>
+                    <span class="kpi-highlight-icon icon-red">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                        <path d="M5 8.5V4a3 3 0 0 1 6 0v6.5a2 2 0 1 1-4 0V5.5" stroke="currentColor" stroke-width="1.4"
+                          stroke-linecap="round" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Remaining metrics — same at-a-glance chip strip as before. Only
+                     Review Done still lives here (Nozzle Orient. and Clip Drawings
+                     were promoted into the highlight row above alongside the other 4). -->
+                <div class="status-strip" id="statusStrip">
+                  <div class="status-chip" data-metric="model-review"><span class="status-chip-dot"></span><span
+                      class="status-chip-label">Review Done</span><span class="status-chip-value">—</span></div>
+                  <div class="status-chip" data-metric="iso-worked"><span class="status-chip-dot"></span><span
+                      class="status-chip-label">ISO Worked</span><span class="status-chip-value">—</span></div>
+                  <div class="status-chip" data-metric="special-support"><span class="status-chip-dot"></span><span
+                      class="status-chip-label">Spec. Support</span><span class="status-chip-value">—</span></div>
+                  <div class="status-chip" data-metric="mds"><span class="status-chip-dot"></span><span
+                      class="status-chip-label">MDS</span><span class="status-chip-value">—</span></div>
+                  <div class="status-chip" data-metric="vendor-drawings"><span class="status-chip-dot"></span><span
+                      class="status-chip-label">Vendor Dwgs</span><span class="status-chip-value">—</span></div>
+                  <div class="status-chip" data-metric="mr-released"><span class="status-chip-dot"></span><span
+                      class="status-chip-label">MR Released</span><span class="status-chip-value">—</span></div>
+                  <div class="status-chip" data-metric="dept-hold"><span class="status-chip-dot"></span><span
+                      class="status-chip-label">Dept. Holds</span><span class="status-chip-value">—</span></div>
+                </div>
+
+                <div class="kpi-mosaic">
+
+                  <!-- ISO Issued / Total ISO — revision-wise bar chart -->
+                  <div class="kpi-tile kpi-tile--bars span-4" id="kpi-iso-issued">
+                    <div class="kpi-tile-head">
+                      <span class="kpi-tile-label">ISO Issued / Total ISO</span>
+                      <span class="kpi-tile-badge">REV-WISE</span>
+                    </div>
+                    <div class="kpi-barchart">
+                      <div class="bar-col">
+                        <div class="bar pulse" style="height:34%"></div><span class="bar-col-label">Rev 0</span>
+                      </div>
+                      <div class="bar-col">
+                        <div class="bar pulse" style="height:50%"></div><span class="bar-col-label">Rev 1</span>
+                      </div>
+                      <div class="bar-col">
+                        <div class="bar pulse" style="height:40%"></div><span class="bar-col-label">Rev 2</span>
+                      </div>
+                      <div class="bar-col">
+                        <div class="bar pulse" style="height:26%"></div><span class="bar-col-label">Rev 3</span>
+                      </div>
+                      <div class="bar-col">
+                        <div class="bar pulse" style="height:18%"></div><span class="bar-col-label">Rev 4+</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption" id="kpi-iso-issued-caption">Awaiting data feed…</span>
+                  </div>
+
+                  <!-- Model Review Status — milestone timeline (done / planned / to-plan) -->
+                  <div class="kpi-tile kpi-tile--milestones span-4" id="kpi-model-review">
+                    <div class="kpi-tile-head">
+                      <span class="kpi-tile-label">Model Review Status</span>
+                      <span class="kpi-tile-badge">13 STATES</span>
+                    </div>
+                    <div class="kpi-milestones">
+                      <div class="kpi-milestone-bar">
+                        <div class="kpi-milestone-seg done"></div>
+                        <div class="kpi-milestone-seg planned"></div>
+                        <div class="kpi-milestone-seg unplanned"></div>
+                      </div>
+                      <div class="kpi-milestone-row">
+                        <span class="kpi-milestone-dot done"></span>
+                        <div class="kpi-milestone-text">
+                          <span class="kpi-milestone-label"><span class="kpi-milestone-pct"
+                              id="kpi-mr-done-pct">—</span> Review done</span>
+                          <span class="kpi-milestone-dates" id="kpi-mr-done-dates">Awaiting data feed…</span>
+                        </div>
+                      </div>
+                      <div class="kpi-milestone-row">
+                        <span class="kpi-milestone-dot planned"></span>
+                        <div class="kpi-milestone-text">
+                          <span class="kpi-milestone-label"><span class="kpi-milestone-pct"
+                              id="kpi-mr-planned-pct">—</span> Planned</span>
+                          <span class="kpi-milestone-dates" id="kpi-mr-planned-dates">Awaiting data feed…</span>
+                        </div>
+                      </div>
+                      <div class="kpi-milestone-row">
+                        <span class="kpi-milestone-dot unplanned"></span>
+                        <div class="kpi-milestone-text">
+                          <span class="kpi-milestone-label"><span class="kpi-milestone-pct"
+                              id="kpi-mr-unplanned-pct">—</span> Still to be planned</span>
+                          <span class="kpi-milestone-dates" id="kpi-mr-unplanned-dates">Awaiting data feed…</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Line Modelling Status — bar chart by size range -->
+                  <div class="kpi-tile kpi-tile--bars span-4" id="kpi-line-modelling">
+                    <div class="kpi-tile-head">
+                      <span class="kpi-tile-label">Line Modelling Status</span>
+                      <span class="kpi-tile-badge">SIZE-WISE</span>
+                    </div>
+                    <div class="kpi-modelled-summary">
+                      <span class="kpi-modelled-frac" id="kpi-lm-fraction">—</span>
+                      <span class="kpi-modelled-sub">lines modelled</span>
+                    </div>
+                    <div class="kpi-bar-legend">
+                      <span><i class="dot modelled"></i>Modelled</span>
+                      <span><i class="dot remaining"></i>Remaining</span>
+                    </div>
+                    <div class="kpi-barchart">
+                      <div class="bar-col">
+                        <div class="bar-stack" style="height:38%">
+                          <div class="bar-remaining" style="height:0%"></div>
+                          <div class="bar-modelled pulse" style="height:100%"></div>
+                        </div>
+                        <span class="bar-col-label">&le;1.5&Prime;</span>
+                      </div>
+                      <div class="bar-col">
+                        <div class="bar-stack" style="height:62%">
+                          <div class="bar-remaining" style="height:0%"></div>
+                          <div class="bar-modelled pulse" style="height:100%"></div>
+                        </div>
+                        <span class="bar-col-label">2&Prime;-6&Prime;</span>
+                      </div>
+                      <div class="bar-col">
+                        <div class="bar-stack" style="height:44%">
+                          <div class="bar-remaining" style="height:0%"></div>
+                          <div class="bar-modelled pulse" style="height:100%"></div>
+                        </div>
+                        <span class="bar-col-label">8&Prime;-12&Prime;</span>
+                      </div>
+                      <div class="bar-col">
+                        <div class="bar-stack" style="height:28%">
+                          <div class="bar-remaining" style="height:0%"></div>
+                          <div class="bar-modelled pulse" style="height:100%"></div>
+                        </div>
+                        <span class="bar-col-label">&ge;14&Prime;</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption" id="kpi-line-modelling-caption">Awaiting data feed…</span>
+                  </div>
+
+                  <!-- ISO Worked On — weekly issued bars + cumulative achievement curve -->
+                  <div class="kpi-tile kpi-tile--combo span-8" id="kpi-iso-worked">
+                    <div class="kpi-tile-head">
+                      <span class="kpi-tile-label">ISO Worked On</span>
+                      <span class="kpi-tile-badge">TIMELINE</span>
+                    </div>
+                    <div class="kpi-combo-legend">
+                      <span><i class="dot bars"></i>Weekly issued</span>
+                      <span><i class="dot line"></i>Cumulative</span>
+                    </div>
+                    <div class="kpi-combo-chart">
+                      <svg viewBox="0 0 460 150" preserveAspectRatio="none">
+                        <g class="kpi-trend-grid">
+                          <line x1="0" y1="20" x2="460" y2="20" />
+                          <line x1="0" y1="80" x2="460" y2="80" />
+                          <line x1="0" y1="140" x2="460" y2="140" />
+                        </g>
+                        <g id="kpi-iso-bars">
+                          <rect class="combo-bar pulse" x="11" y="140" width="36" height="0" />
+                          <rect class="combo-bar pulse" x="68" y="140" width="36" height="0" />
+                          <rect class="combo-bar pulse" x="126" y="140" width="36" height="0" />
+                          <rect class="combo-bar pulse" x="183" y="140" width="36" height="0" />
+                          <rect class="combo-bar pulse" x="241" y="140" width="36" height="0" />
+                          <rect class="combo-bar pulse" x="298" y="140" width="36" height="0" />
+                          <rect class="combo-bar pulse" x="356" y="140" width="36" height="0" />
+                          <rect class="combo-bar pulse" x="413" y="140" width="36" height="0" />
+                        </g>
+                        <g id="kpi-iso-bar-values"></g>
+                        <polyline class="kpi-combo-line-track" points="" />
+                        <polyline class="kpi-combo-line-sweep" id="kpi-iso-cum-line" points="" />
+                        <g id="kpi-iso-cum-dots"></g>
+                      </svg>
+                      <div class="kpi-combo-labels">
+                        <span>W1</span><span>W2</span><span>W3</span><span>W4</span>
+                        <span>W5</span><span>W6</span><span>W7</span><span>W8</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption" id="kpi-iso-worked-caption">Weekly ISO throughput · awaiting data
+                      feed…</span>
+                  </div>
+
+                  <!-- Progress from PPMS — gauge -->
+                  <div class="kpi-tile kpi-tile--gauge-sm span-4" id="kpi-ppms-progress">
+                    <div class="kpi-tile-head">
+                      <span class="kpi-tile-label">Progress from PPMS</span>
+                      <span class="kpi-tile-badge">EXTERNAL</span>
+                    </div>
+                    <div class="kpi-gauge-wrap sm">
+                      <svg viewBox="0 0 100 100">
+                        <circle class="kpi-ring-track" cx="50" cy="50" r="38" stroke-width="9" />
+                        <circle class="kpi-ring-sweep" cx="50" cy="50" r="38" stroke-width="9"
+                          stroke-dasharray="22 216" />
+                      </svg>
+                      <div class="kpi-gauge-value sm">—<small>completed</small></div>
+                    </div>
+                    <span class="kpi-caption" id="kpi-ppms-caption">Awaiting data feed…</span>
+                  </div>
+
+                  <!-- Small status gauges — flex row, so adding/removing cards never fights the 12-col grid math -->
+                  <div class="kpi-row span-12">
+
+                    <!-- Special Support Drawings Issued -->
+                    <div class="kpi-tile kpi-tile--gauge-sm" id="kpi-special-support">
+                      <div class="kpi-tile-head"><span class="kpi-tile-label">Special Support Drawings</span></div>
+                      <div class="kpi-gauge-wrap sm">
+                        <svg viewBox="0 0 100 100">
+                          <circle class="kpi-ring-track" cx="50" cy="50" r="36" stroke-width="8" />
+                          <circle class="kpi-ring-sweep" cx="50" cy="50" r="36" stroke-width="8"
+                            stroke-dasharray="20 206" />
+                        </svg>
+                        <div class="kpi-gauge-value sm">—<small>issued</small></div>
+                      </div>
+                      <span class="kpi-caption" id="kpi-special-support-caption">Awaiting data feed…</span>
+                    </div>
+
+                    <!-- GAD Status -->
+                    <div class="kpi-tile kpi-tile--gauge-sm" id="kpi-gad">
+                      <div class="kpi-tile-head"><span class="kpi-tile-label">GAD Status</span></div>
+                      <div class="kpi-gauge-wrap sm">
+                        <svg viewBox="0 0 100 100">
+                          <circle class="kpi-ring-track" cx="50" cy="50" r="36" stroke-width="8" />
+                          <circle class="kpi-ring-sweep" cx="50" cy="50" r="36" stroke-width="8"
+                            stroke-dasharray="20 206" />
+                        </svg>
+                        <div class="kpi-gauge-value sm">—<small>issued</small></div>
+                      </div>
+                      <span class="kpi-caption" id="kpi-gad-caption">Awaiting data feed…</span>
+                    </div>
+
+                    <!-- Nozzle Orientation Status -->
+                    <div class="kpi-tile kpi-tile--gauge-sm" id="kpi-nozzle">
+                      <div class="kpi-tile-head"><span class="kpi-tile-label">Nozzle Orientation Status</span></div>
+                      <div class="kpi-gauge-wrap sm">
+                        <svg viewBox="0 0 100 100">
+                          <circle class="kpi-ring-track" cx="50" cy="50" r="36" stroke-width="8" />
+                          <circle class="kpi-ring-sweep" cx="50" cy="50" r="36" stroke-width="8"
+                            stroke-dasharray="20 206" />
+                        </svg>
+                        <div class="kpi-gauge-value sm">—<small>issued</small></div>
+                      </div>
+                      <span class="kpi-caption" id="kpi-nozzle-caption">Awaiting data feed…</span>
+                    </div>
+
+                    <!-- Clip Drawings Status -->
+                    <div class="kpi-tile kpi-tile--gauge-sm" id="kpi-clip-drawings">
+                      <div class="kpi-tile-head"><span class="kpi-tile-label">Clip Drawings Status</span></div>
+                      <div class="kpi-gauge-wrap sm">
+                        <svg viewBox="0 0 100 100">
+                          <circle class="kpi-ring-track" cx="50" cy="50" r="36" stroke-width="8" />
+                          <circle class="kpi-ring-sweep" cx="50" cy="50" r="36" stroke-width="8"
+                            stroke-dasharray="20 206" />
+                        </svg>
+                        <div class="kpi-gauge-value sm">—</div>
+                      </div>
+                      <span class="kpi-caption" id="kpi-clip-drawings-caption">Awaiting data feed…</span>
+                    </div>
+
+                    <!-- MDS Availability -->
+                    <div class="kpi-tile kpi-tile--gauge-sm" id="kpi-mds-availability">
+                      <div class="kpi-tile-head"><span class="kpi-tile-label">MDS Availability</span></div>
+                      <div class="kpi-gauge-wrap sm">
+                        <svg viewBox="0 0 100 100">
+                          <circle class="kpi-ring-track" cx="50" cy="50" r="36" stroke-width="8" />
+                          <circle class="kpi-ring-sweep" cx="50" cy="50" r="36" stroke-width="8"
+                            stroke-dasharray="20 206" />
+                        </svg>
+                        <div class="kpi-gauge-value sm">—</div>
+                      </div>
+                      <span class="kpi-caption" id="kpi-mds-availability-caption">Awaiting data feed…</span>
+                    </div>
+
+                    <!-- Vendor Drawings Availability -->
+                    <div class="kpi-tile kpi-tile--gauge-sm" id="kpi-vendor-drawings">
+                      <div class="kpi-tile-head"><span class="kpi-tile-label">Vendor Drawings Availability</span></div>
+                      <div class="kpi-gauge-wrap sm">
+                        <svg viewBox="0 0 100 100">
+                          <circle class="kpi-ring-track" cx="50" cy="50" r="36" stroke-width="8" />
+                          <circle class="kpi-ring-sweep" cx="50" cy="50" r="36" stroke-width="8"
+                            stroke-dasharray="20 206" />
+                        </svg>
+                        <div class="kpi-gauge-value sm">—</div>
+                      </div>
+                      <span class="kpi-caption" id="kpi-vendor-drawings-caption">Awaiting data feed…</span>
+                    </div>
+
+                    <!-- MR Released -->
+                    <div class="kpi-tile kpi-tile--gauge-sm" id="kpi-mr-released">
+                      <div class="kpi-tile-head"><span class="kpi-tile-label">MR Released</span></div>
+                      <div class="kpi-gauge-wrap sm">
+                        <svg viewBox="0 0 100 100">
+                          <circle class="kpi-ring-track" cx="50" cy="50" r="36" stroke-width="8" />
+                          <circle class="kpi-ring-sweep" cx="50" cy="50" r="36" stroke-width="8"
+                            stroke-dasharray="20 206" />
+                        </svg>
+                        <div class="kpi-gauge-value sm">—<small>released</small></div>
+                      </div>
+                      <span class="kpi-caption" id="kpi-mr-released-caption">Awaiting data feed…</span>
+                    </div>
+
+                  </div>
+
+                  <!-- Other Departments Hold — wide horizontal skeleton bars -->
+                  <div class="kpi-tile kpi-tile--hbars span-12" id="kpi-dept-hold">
+                    <div class="kpi-tile-head">
+                      <span class="kpi-tile-label">Other Departments Hold</span>
+                      <span class="kpi-tile-badge">AWAITING FIELD</span>
+                    </div>
+                    <div class="kpi-hbars">
+                      <div class="kpi-hbar-row">
+                        <div class="kpi-hbar-track">
+                          <div class="kpi-hbar-fill"></div>
+                        </div>
+                      </div>
+                      <div class="kpi-hbar-row">
+                        <div class="kpi-hbar-track">
+                          <div class="kpi-hbar-fill"></div>
+                        </div>
+                      </div>
+                      <div class="kpi-hbar-row">
+                        <div class="kpi-hbar-track">
+                          <div class="kpi-hbar-fill"></div>
+                        </div>
+                      </div>
+                      <div class="kpi-hbar-row">
+                        <div class="kpi-hbar-track">
+                          <div class="kpi-hbar-fill"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <span class="kpi-caption" id="kpi-dept-hold-caption">Awaiting data feed…</span>
+                  </div>
+
+                </div>
+
+              </div>
+              <!-- /view-progress -->
+
+              <!-- Pending Works view — static demo list, not connected yet -->
+              <div class="view-panel" id="view-pending" data-view="pending">
+                <div class="kpi-mosaic">
+
+                  <!-- PIMS & Utilities — busiest module, widest card -->
+                  <div class="kpi-tile kpi-tile--tickets span-6" style="min-height:0;">
+                    <div class="kpi-tile-head">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="kpi-highlight-icon icon-accent">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 2l6 3-6 3-6-3 6-3z" /><path d="M2 8l6 3 6-3" /><path d="M2 11l6 3 6-3" />
+                          </svg>
+                        </span>
+                        <span class="kpi-tile-label">PIMS &amp; Utilities</span>
+                      </div>
+                      <span class="kpi-tile-badge">7 PENDING</span>
+                    </div>
+                    <div class="kpi-ticket-list">
+                      <div class="ticket-row">
+                        <span class="ticket-id">PW-101</span>
+                        <span class="ticket-name">Line AP-111-HSC034-C — GL Review</span>
+                        <span class="ticket-status ongoing">Ongoing</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">PW-102</span>
+                        <span class="ticket-name">Special Support Sketch — Unit 101</span>
+                        <span class="ticket-status pending">Pending</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">PW-103</span>
+                        <span class="ticket-name">Clash Re-upload — Job B378 / Unit 102</span>
+                        <span class="ticket-status blocked">Blocked</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">PW-104</span>
+                        <span class="ticket-name">GAD Approval — Job B378</span>
+                        <span class="ticket-status active">Active</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">PW-105</span>
+                        <span class="ticket-name">ISO Re-issue — P-101-23612-A</span>
+                        <span class="ticket-status ongoing">Ongoing</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">PW-106</span>
+                        <span class="ticket-name">Weld Table Review — AP-111-HSC026-C</span>
+                        <span class="ticket-status pending">Pending</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">PW-107</span>
+                        <span class="ticket-name">MR Sign-off — Job A101 / Unit 101</span>
+                        <span class="ticket-status done">Done</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption">Sample rows — not wired to a real task queue yet</span>
+                  </div>
+
+                  <!-- MTO Consolidation System -->
+                  <div class="kpi-tile kpi-tile--tickets span-3" style="min-height:0;">
+                    <div class="kpi-tile-head">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="kpi-highlight-icon icon-purple">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 4h10M3 8h10M3 12h6" />
+                          </svg>
+                        </span>
+                        <span class="kpi-tile-label">MTO Consolidation</span>
+                      </div>
+                      <span class="kpi-tile-badge">2 PENDING</span>
+                    </div>
+                    <div class="kpi-ticket-list">
+                      <div class="ticket-row">
+                        <span class="ticket-id">MTO-201</span>
+                        <span class="ticket-name">Bulk MTO Reconciliation — Job B378</span>
+                        <span class="ticket-status pending">Pending</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">MTO-202</span>
+                        <span class="ticket-name">IPMCS Sync Check — Unit 101</span>
+                        <span class="ticket-status ongoing">Ongoing</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption">Not wired to a real task queue yet</span>
+                  </div>
+
+                  <!-- Stress Analysis -->
+                  <div class="kpi-tile kpi-tile--tickets span-3" style="min-height:0;">
+                    <div class="kpi-tile-head">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="kpi-highlight-icon icon-red">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 8h3l1.5-4 2 8 1.5-4H14" />
+                          </svg>
+                        </span>
+                        <span class="kpi-tile-label">Stress Analysis</span>
+                      </div>
+                      <span class="kpi-tile-badge">4 PENDING</span>
+                    </div>
+                    <div class="kpi-ticket-list">
+                      <div class="ticket-row">
+                        <span class="ticket-id">STR-301</span>
+                        <span class="ticket-name">Nozzle Load Validation — AP-111-HSC034-C</span>
+                        <span class="ticket-status ongoing">Ongoing</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">STR-302</span>
+                        <span class="ticket-name">Flexibility Run — Job A101 / Unit 102</span>
+                        <span class="ticket-status pending">Pending</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">STR-303</span>
+                        <span class="ticket-name">Support Re-check — P-101-23612-A</span>
+                        <span class="ticket-status blocked">Blocked</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">STR-304</span>
+                        <span class="ticket-name">Stress Isometric Sign-off — Unit 111</span>
+                        <span class="ticket-status active">Active</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption">Not wired to a real task queue yet</span>
+                  </div>
+
+                  <!-- Model and Model Review -->
+                  <div class="kpi-tile kpi-tile--tickets span-4" style="min-height:0;">
+                    <div class="kpi-tile-head">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="kpi-highlight-icon icon-accent">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 2l5 3v6l-5 3-5-3V5l5-3z" /><path d="M3 5l5 3 5-3M8 8v6" />
+                          </svg>
+                        </span>
+                        <span class="kpi-tile-label">Model &amp; Model Review</span>
+                      </div>
+                      <span class="kpi-tile-badge">3 PENDING</span>
+                    </div>
+                    <div class="kpi-ticket-list">
+                      <div class="ticket-row">
+                        <span class="ticket-id">MDL-401</span>
+                        <span class="ticket-name">Clash Re-review — Job B378 / Unit 102</span>
+                        <span class="ticket-status blocked">Blocked</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">MDL-402</span>
+                        <span class="ticket-name">Model Freeze Check — Unit 101</span>
+                        <span class="ticket-status ongoing">Ongoing</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">MDL-403</span>
+                        <span class="ticket-name">Piping Model QA — Job A101</span>
+                        <span class="ticket-status done">Done</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption">Not wired to a real task queue yet</span>
+                  </div>
+
+                  <!-- Coordination with Other Department -->
+                  <div class="kpi-tile kpi-tile--tickets span-4" style="min-height:0;">
+                    <div class="kpi-tile-head">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="kpi-highlight-icon icon-amber">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="5.5" cy="5" r="2" /><circle cx="11" cy="6" r="1.6" />
+                            <path d="M2 13c0-2 1.5-3.3 3.5-3.3S9 11 9 13" /><path d="M9.3 9.9c1.6.1 2.7 1.3 2.7 3.1" />
+                          </svg>
+                        </span>
+                        <span class="kpi-tile-label">Coordination — Other Dept.</span>
+                      </div>
+                      <span class="kpi-tile-badge">4 PENDING</span>
+                    </div>
+                    <div class="kpi-ticket-list">
+                      <div class="ticket-row">
+                        <span class="ticket-id">CRD-501</span>
+                        <span class="ticket-name">Civil Hold Release — Job B378</span>
+                        <span class="ticket-status blocked">Blocked</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">CRD-502</span>
+                        <span class="ticket-name">Electrical Routing Clash — Unit 111</span>
+                        <span class="ticket-status pending">Pending</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">CRD-503</span>
+                        <span class="ticket-name">Instrumentation Tie-in Review — Unit 101</span>
+                        <span class="ticket-status ongoing">Ongoing</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">CRD-504</span>
+                        <span class="ticket-name">HVAC Interface Sign-off — Job A101</span>
+                        <span class="ticket-status active">Active</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption">Not wired to a real task queue yet</span>
+                  </div>
+
+                  <!-- Document Review Portal (DRP) -->
+                  <div class="kpi-tile kpi-tile--tickets span-4" style="min-height:0;">
+                    <div class="kpi-tile-head">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="kpi-highlight-icon icon-green">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 2h4l3 3v9H5V2z" /><path d="M6.5 8.5l1.3 1.3L10 7.3" />
+                          </svg>
+                        </span>
+                        <span class="kpi-tile-label">Document Review Portal</span>
+                      </div>
+                      <span class="kpi-tile-badge">1 PENDING</span>
+                    </div>
+                    <div class="kpi-ticket-list">
+                      <div class="ticket-row">
+                        <span class="ticket-id">DRP-601</span>
+                        <span class="ticket-name">Vendor Drawing Review — Job B378</span>
+                        <span class="ticket-status pending">Pending</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption">Not wired to a real task queue yet</span>
+                  </div>
+
+                  <!-- GAD -->
+                  <div class="kpi-tile kpi-tile--tickets span-4" style="min-height:0;">
+                    <div class="kpi-tile-head">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="kpi-highlight-icon icon-purple">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="8" cy="8" r="6" /><path d="M8 8l3-4M8 8l-1 4.5" />
+                          </svg>
+                        </span>
+                        <span class="kpi-tile-label">GAD</span>
+                      </div>
+                      <span class="kpi-tile-badge">3 PENDING</span>
+                    </div>
+                    <div class="kpi-ticket-list">
+                      <div class="ticket-row">
+                        <span class="ticket-id">GAD-701</span>
+                        <span class="ticket-name">GAD Approval — Job A101 / Unit 101</span>
+                        <span class="ticket-status ongoing">Ongoing</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">GAD-702</span>
+                        <span class="ticket-name">GAD Revision Mark-up — Unit 102</span>
+                        <span class="ticket-status pending">Pending</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">GAD-703</span>
+                        <span class="ticket-name">GAD Issue for Construction — Job B378</span>
+                        <span class="ticket-status done">Done</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption">Not wired to a real task queue yet</span>
+                  </div>
+
+                  <!-- Nozzle Orientation -->
+                  <div class="kpi-tile kpi-tile--tickets span-4" style="min-height:0;">
+                    <div class="kpi-tile-head">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="kpi-highlight-icon icon-amber">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="8" cy="8" r="6" /><circle cx="8" cy="8" r="2.6" />
+                          </svg>
+                        </span>
+                        <span class="kpi-tile-label">Nozzle Orientation</span>
+                      </div>
+                      <span class="kpi-tile-badge">3 PENDING</span>
+                    </div>
+                    <div class="kpi-ticket-list">
+                      <div class="ticket-row">
+                        <span class="ticket-id">NOZ-801</span>
+                        <span class="ticket-name">Nozzle Orientation Check — AP-111-HSC034-C</span>
+                        <span class="ticket-status ongoing">Ongoing</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">NOZ-802</span>
+                        <span class="ticket-name">Orientation Mismatch — Job B378 / Unit 102</span>
+                        <span class="ticket-status blocked">Blocked</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">NOZ-803</span>
+                        <span class="ticket-name">Nozzle Orientation Sign-off — Unit 101</span>
+                        <span class="ticket-status pending">Pending</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption">Not wired to a real task queue yet</span>
+                  </div>
+
+                  <!-- Clip Drawings -->
+                  <div class="kpi-tile kpi-tile--tickets span-4" style="min-height:0;">
+                    <div class="kpi-tile-head">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="kpi-highlight-icon icon-red">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 8.5V4a3 3 0 0 1 6 0v6.5a2 2 0 1 1-4 0V5.5" />
+                          </svg>
+                        </span>
+                        <span class="kpi-tile-label">Clip Drawings</span>
+                      </div>
+                      <span class="kpi-tile-badge">2 PENDING</span>
+                    </div>
+                    <div class="kpi-ticket-list">
+                      <div class="ticket-row">
+                        <span class="ticket-id">CLP-901</span>
+                        <span class="ticket-name">Clip Drawing Issue — Job A101 / Unit 111</span>
+                        <span class="ticket-status pending">Pending</span>
+                      </div>
+                      <div class="ticket-row">
+                        <span class="ticket-id">CLP-902</span>
+                        <span class="ticket-name">Clip Drawing Re-check — P-101-23612-A</span>
+                        <span class="ticket-status active">Active</span>
+                      </div>
+                    </div>
+                    <span class="kpi-caption">Not wired to a real task queue yet</span>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Monitoring view — static demo activity feed, not connected yet -->
+              <div class="view-panel" id="view-monitoring" data-view="monitoring">
+                <div class="kpi-tile kpi-tile--activity" style="min-height:0;">
+                  <div class="kpi-tile-head">
+                    <span class="kpi-tile-label">Monitoring</span>
+                    <span class="kpi-tile-badge">STATIC · DEMO</span>
+                  </div>
+                  <div class="kpi-activity-list">
+                    <div class="activity-row">
+                      <span class="activity-dot good"></span>
+                      <span class="activity-text">Clash report uploaded — Job B378 / Unit 111</span>
+                      <span class="activity-time">10 min ago</span>
+                    </div>
+                    <div class="activity-row">
+                      <span class="activity-dot good"></span>
+                      <span class="activity-text">GAD issued — Line P-101-21501-A</span>
+                      <span class="activity-time">1 hr ago</span>
+                    </div>
+                    <div class="activity-row">
+                      <span class="activity-dot watch"></span>
+                      <span class="activity-text">Special support added — Unit 102</span>
+                      <span class="activity-time">3 hrs ago</span>
+                    </div>
+                    <div class="activity-row">
+                      <span class="activity-dot good"></span>
+                      <span class="activity-text">Model review completed — AP-111-HSC026-C</span>
+                      <span class="activity-time">Yesterday</span>
+                    </div>
+                    <div class="activity-row">
+                      <span class="activity-dot info"></span>
+                      <span class="activity-text">INCH data updated — Job A101</span>
+                      <span class="activity-time">2 days ago</span>
+                    </div>
+                    <div class="activity-row">
+                      <span class="activity-dot risk"></span>
+                      <span class="activity-text">MDS mismatch flagged — Line P-101-12623-A</span>
+                      <span class="activity-time">2 days ago</span>
+                    </div>
+                    <div class="activity-row">
+                      <span class="activity-dot good"></span>
+                      <span class="activity-text">Line list normalized — Job A101, 450 lines</span>
+                      <span class="activity-time">3 days ago</span>
+                    </div>
+                  </div>
+                  <span class="kpi-caption">Sample events — will show live system activity once connected</span>
+                </div>
+              </div>
+
+            </div>
+
+          </main>
+        </div>
+
+        <!-- ══ INFO RAIL — AI Assistant / Notifications / Recently Accessed ═══
+                 Full-height vertical strip, structurally a sibling of .sidebar and
+                 .content (not nested inside .main) — same "part of the page frame,
+                 not floating over it" treatment as the left sidebar. Always-visible
+                 stacked sections (not a switcher). -->
+        <aside class="info-rail" id="infoRail">
+
+          <!-- AI Assistant — static UI shell, no LLM backend wired up yet -->
+          <div class="info-rail-section info-rail-section--ai">
+            <div class="kpi-tile-head">
+              <span class="kpi-tile-label">AI Assistant</span>
+              <span class="kpi-tile-badge">STATIC · DEMO</span>
+            </div>
+            <div class="ai-greeting">
+              <span class="ai-greeting-emoji">👋</span>
+              <p>Hello <span id="aiGreetName">there</span>! How can I help you today?</p>
+            </div>
+            <div class="ai-quick-actions">
+              <button type="button" class="ai-quick-btn" disabled title="Not connected yet">Find Line / Tag</button>
+              <button type="button" class="ai-quick-btn" disabled title="Not connected yet">Generate Report</button>
+              <button type="button" class="ai-quick-btn" disabled title="Not connected yet">Search MDS</button>
+              <button type="button" class="ai-quick-btn" disabled title="Not connected yet">Check Nozzle
+                Orient.</button>
+            </div>
+            <div class="ai-input-row">
+              <input type="text" class="ai-input" placeholder="Ask anything…" disabled>
+              <button type="button" class="ai-send-btn" disabled title="Not connected yet">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 8h11M8.5 3.5L13 8l-4.5 4.5" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+            <span class="kpi-caption">Not connected to an AI backend yet</span>
+          </div>
+
+          <!-- Notifications — real data, same /api/notif feed the bell/panel
+               uses (see gateway.js loadInfoRailNotifications). Same
+               activity-row shape Monitoring's demo list already uses, but
+               this one is live. -->
+          <div class="info-rail-section">
+            <div class="kpi-tile-head">
+              <span class="kpi-tile-label">Notifications</span>
+              <span class="kpi-tile-badge">LIVE</span>
+            </div>
+            <div class="kpi-activity-list" id="gwNotifList">
+              <span class="kpi-caption">Loading…</span>
+            </div>
+            <span class="kpi-caption">Same feed as the bell icon — click a row to jump there</span>
+          </div>
+
+          <!-- Guideline Issued for Job — placeholder, no data source exists
+               yet in PIMS. Same static/demo treatment as the AI Assistant
+               section above until this is defined and wired to something
+               real. -->
+          <div class="info-rail-section">
+            <div class="kpi-tile-head">
+              <span class="kpi-tile-label">Guideline Issued for Job</span>
+              <span class="kpi-tile-badge">STATIC · DEMO</span>
+            </div>
+            <span class="kpi-caption">Not connected yet</span>
+          </div>
+
+          <!-- Recently Accessed — frontend-only, tracks clicks on sidebar
+               module/sub-module links via localStorage (see gateway.js
+               trackRecentAccess/loadInfoRailRecent). Device-local, not a
+               server feed — replaced the old "Stored Line Lists" panel. -->
+          <div class="info-rail-section">
+            <div class="kpi-tile-head">
+              <span class="kpi-tile-label">Recently Accessed</span>
+            </div>
+            <div class="kpi-recent-list" id="gwRecentList">
+              <span class="kpi-caption">Nothing opened yet this session</span>
+            </div>
+            <span class="kpi-caption">Modules you've recently opened from this sidebar — stored on this device</span>
+          </div>
+
+        </aside>
+
+        <!-- ══ ICON RAIL — view switcher ═══════════════
+                 Also a full-height sibling strip now (was a floating fixed pill) —
+                 same treatment as the info rail above. Clicking an icon shows
+                 exactly one .view-panel and hides the others (see gateway.js). -->
+        <nav class="icon-rail" id="iconRail">
+          <!-- Collapses/expands the info rail (AI Assistant / Notifications /
+               Guideline Issued for Job / Recently Accessed) to its left.
+               Lives here, not on the info rail itself, so it stays reachable
+               even once that panel is
+               collapsed to width:0. -->
+          <button class="icon-rail-btn icon-rail-btn--collapse" id="infoRailToggle" title="Collapse panel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polyline points="9 6 15 12 9 18" />
+            </svg>
+          </button>
+          <div class="icon-rail-sep"></div>
+          <button class="icon-rail-btn active" data-view="progress" title="Progress Summary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+          </button>
+          <button class="icon-rail-btn" data-view="pending" title="Pending Works">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="5" y="4" width="14" height="17" rx="2" />
+              <path d="M9 4V2.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V4" />
+              <path d="M8.5 12.5l2 2 4-4.5" />
+            </svg>
+          </button>
+          <button class="icon-rail-btn" data-view="monitoring" title="Monitoring">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </button>
+        </nav>
+
+      </div>
+      <!-- /.body-row -->
+
+    </div>
+    <!-- /.body-shell -->
+
+  </div>
+  <!-- /.layout -->
+
+  <!-- Launch overlay -->
+  <div class="launch-overlay" id="launchOverlay">
+    <div class="launch-modal">
+      <div class="launch-spinner"></div>
+      <p class="launch-msg" id="launchMsg">Connecting…</p>
+    </div>
+  </div>
+
+  <!-- Notification overlay + panel — real, live (see js/notifications.js) -->
+  <div class="notif-overlay" id="notifOverlay"></div>
+  <aside class="notif-panel" id="notifPanel">
+    <div class="notif-panel-header">
+      <span class="notif-panel-title">Notifications</span>
+      <button class="notif-mark-all" id="notifMarkAll">Mark all read</button>
+      <button class="notif-close" id="notifClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="notif-list" id="notifList"></div>
+  </aside>
+
+  <!-- Change Password modal — real, wired to /api/change-password (same
+       endpoint dashboard.html's modal uses), reachable from the topbar
+       profile dropdown. -->
+  <div class="cpw-modal-bg" id="cpwModalBg">
+    <div class="cpw-modal">
+      <div class="cpw-modal-header">
+        <span>Change Password</span>
+        <button class="cpw-close" id="cpwClose" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+      <form id="cpwForm" class="cpw-form" autocomplete="off">
+        <label class="cpw-field">
+          <span>Current Password</span>
+          <input type="password" id="cpwCurrent" placeholder="Enter current password" autocomplete="current-password" />
+        </label>
+        <label class="cpw-field">
+          <span>New Password</span>
+          <input type="password" id="cpwNew" placeholder="Enter new password" autocomplete="new-password" />
+        </label>
+        <label class="cpw-field">
+          <span>Confirm New Password</span>
+          <input type="password" id="cpwConfirm" placeholder="Confirm new password" autocomplete="new-password" />
+        </label>
+        <div class="cpw-msg" id="cpwMsg"></div>
+        <div class="cpw-actions">
+          <button type="button" class="cpw-cancel" id="cpwCancel">Cancel</button>
+          <button type="submit" class="cpw-submit">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/gateway.js"></script>
+  <script src="js/notifications.js"></script>
+  <script>
+    // Modules on the same apps server (e.g. MRCS on :5500) are opened through the
+    // SAME host as this page, so the single sign-on cookie is shared with them.
+    document.querySelectorAll('a[data-same-host-port]').forEach(a => {
+      a.href = `${location.protocol}//${location.hostname}:${a.dataset.sameHostPort}${a.dataset.path || '/'}`;
+    });
+  </script>
+</body>
+
+</html>

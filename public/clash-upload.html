@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clash Report Upload — ePULSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/ll-suite.css"/>
+  <style>
+    /* ── Rose accent for the Clash module ── */
+    :root { --accent: #e11d48; --accent-light: rgba(225,29,72,0.1); --accent-border: rgba(225,29,72,0.25); }
+
+    .ll-topbar-module-icon { background: var(--accent-light); border-color: var(--accent-border); }
+    .ll-topbar-module-icon svg { stroke: var(--accent); }
+    .ll-topbar-module-badge { background: var(--accent-light); color: var(--accent); border-color: var(--accent-border); }
+
+    .ll-bc-curr { color: var(--accent); }
+    .ll-bc-tag  { background: var(--accent-light); border-color: var(--accent-border); color: var(--accent); }
+    .ll-bc-tag svg { stroke: var(--accent); }
+
+    .ll-card-icon.rose { background: var(--accent-light); border-color: var(--accent-border); }
+    .ll-card-icon.rose svg { stroke: var(--accent); }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent); background: var(--accent-light);
+    }
+
+    .btn-accent {
+      background: var(--accent); color: #fff;
+      box-shadow: 0 2px 8px rgba(225,29,72,0.3);
+    }
+    .btn-accent:hover { background: #c11440; }
+    .btn-accent:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
+
+    /* ── Job selector bar ── */
+    .sel-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    .sel-bar .form-group { min-width: 180px; flex: 1; max-width: 260px; }
+
+    /* ── Upload zone file name ── */
+    .zone-file-name {
+      display: inline-block; margin-top: 10px;
+      font-size: 13px; font-weight: 600; color: var(--accent);
+    }
+
+    /* ── Result area ── */
+    #resultArea { display: none; }
+    .result-banner {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; border-radius: var(--radius);
+      font-size: 13.5px; font-weight: 600;
+    }
+    .result-banner.success { background: rgba(40,167,69,0.1); color: #1a7a33; border: 1px solid rgba(40,167,69,0.25); }
+    .result-banner.error   { background: rgba(229,57,53,0.1);  color: #b71c1c; border: 1px solid rgba(229,57,53,0.25); }
+    .result-banner svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ── Preview table wrapper ── */
+    #previewWrap { display: none; }
+    .preview-scroll { overflow-x: auto; max-height: 420px; overflow-y: auto; border-radius: var(--radius); }
+    .preview-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .preview-scroll::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+    .num-cell { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* History summary table */
+    .hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .hist-table th {
+      padding: 9px 14px; font-size: 11.5px; font-weight: 600; text-align: left;
+      background: var(--gray-100); color: var(--text-muted); border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .hist-table td { padding: 10px 14px; border-bottom: 1px solid var(--gray-100); }
+    .hist-table tbody tr:last-child td { border-bottom: none; }
+    .hist-table tbody tr:hover { background: rgba(225,29,72,0.03); }
+    .empty-hint { text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+<div class="ll-shell">
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header class="ll-topbar">
+    <a class="ll-topbar-logo" href="gateway.html">
+      <div class="ll-topbar-brand">
+        <span class="ll-topbar-name">ePULSE</span>
+        <span class="ll-topbar-sub">Coordination with Other Dept.</span>
+      </div>
+    </a>
+    <div class="ll-topbar-div"></div>
+    <div class="ll-topbar-module">
+      <div class="ll-topbar-module-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/>
+        </svg>
+      </div>
+      <span class="ll-topbar-module-name">Clash Report Upload</span>
+      <span class="ll-topbar-module-badge">REPLACE</span>
+    </div>
+    <div class="ll-topbar-spacer"></div>
+    <button class="ll-back-btn" onclick="window.close()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back to Gateway
+    </button>
+  </header>
+
+  <!-- ═══ BREADBAR ═══ -->
+  <div class="ll-breadbar">
+    <span class="ll-bc-item">ePULSE</span>
+    <span class="ll-bc-sep">›</span>
+    <span class="ll-bc-item">Coordination with Other Department</span>
+    <span class="ll-bc-sep">›</span>
+    <span class="ll-bc-curr">Clash Report Upload</span>
+    <div class="ll-bc-spacer"></div>
+    <div class="ll-bc-tag" id="bcTag">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;">
+        <circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/>
+      </svg>
+      No file selected
+    </div>
+  </div>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="ll-main">
+
+    <!-- ── Card 1: Select project + upload ── -->
+    <div class="ll-card">
+      <div class="ll-card-header">
+        <div class="ll-card-icon rose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ll-card-title">Upload S3D Clash Report</div>
+          <div class="ll-card-sub">Select the job and unit, then drop the Navisworks/S3D clash Excel export. That unit's clash data is fully replaced on every upload — resolved clashes disappear, new ones appear. The original file is always kept.<br>
+            Allowed: anyone with a role other than Modeller on that job / unit in PIMS (HOD: all).</div>
+        </div>
+      </div>
+      <div class="ll-card-body">
+
+        <!-- Selectors -->
+        <div class="sel-bar" style="margin-bottom:1.25rem">
+          <div class="form-group">
+            <label class="form-label">Job No.</label>
+            <select class="form-select" id="jobSel">
+              <option value="">— select —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit No.</label>
+            <select class="form-select" id="unitSel" disabled>
+              <option value="">— select —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Drop zone -->
+        <div class="upload-zone" id="dropZone" onclick="document.getElementById('filePicker').click()">
+          <svg class="upload-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+          <div class="upload-zone-title">Drop Excel file here or click to browse</div>
+          <div class="upload-zone-sub">Supported formats: .xlsx · .xls · .csv&nbsp; — &nbsp;Expects an ITEM OID / PIPELINE / CLASHING WITH style clash report</div>
+          <span class="zone-file-name" id="zoneFileName" style="display:none"></span>
+          <input type="file" id="filePicker" accept=".xlsx,.xls,.csv" style="display:none"/>
+        </div>
+
+        <!-- Actions -->
+        <div style="margin-top:1.25rem; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-accent" id="uploadBtn" disabled onclick="doUpload()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+            </svg>
+            Upload Clash Report
+          </button>
+          <button class="btn btn-outline" id="clearBtn" onclick="clearForm()">✕ Clear</button>
+          <span id="uploadSpinner" style="display:none;font-size:12.5px;color:var(--text-muted)">⏳ Uploading…</span>
+        </div>
+
+        <!-- Result banner -->
+        <div id="resultArea" style="margin-top:1rem"></div>
+
+      </div>
+    </div>
+
+    <!-- ── Card 2: Stored clash data summary ── -->
+    <div class="ll-card" id="historyCard">
+      <div class="ll-card-header">
+        <div class="ll-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ll-card-title">Stored Clash Data</div>
+          <div class="ll-card-sub">Current clash set per job / unit (from the latest upload)</div>
+        </div>
+        <div class="ll-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="loadHistory()">↺ Refresh</button>
+        </div>
+      </div>
+      <div class="ll-card-body no-pad">
+        <table class="hist-table" id="histTable">
+          <thead>
+            <tr>
+              <th>Job No.</th>
+              <th>Unit No.</th>
+              <th>Clash Rows</th>
+              <th>Lines Affected</th>
+              <th>Uploaded</th>
+            </tr>
+          </thead>
+          <tbody id="histBody">
+            <tr><td colspan="5" class="empty-hint">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Card: Every uploaded file, kept as-is ── -->
+    <div class="ll-card" id="filesCard">
+      <div class="ll-card-header">
+        <div class="ll-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ll-card-title">Uploaded Files</div>
+          <div class="ll-card-sub">Every clash report ever uploaded, kept exactly as uploaded (newest first)</div>
+        </div>
+        <div class="ll-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="loadFiles()">↺ Refresh</button>
+        </div>
+      </div>
+      <div class="ll-card-body no-pad">
+        <table class="hist-table">
+          <thead>
+            <tr>
+              <th>Job No.</th>
+              <th>Unit No.</th>
+              <th>File</th>
+              <th>Rows</th>
+              <th>Uploaded By</th>
+              <th>Uploaded</th>
+            </tr>
+          </thead>
+          <tbody id="filesBody">
+            <tr><td colspan="6" class="empty-hint">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Card 3: Row preview (after upload) ── -->
+    <div class="ll-card" id="previewWrap">
+      <div class="ll-card-header">
+        <div class="ll-card-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ll-card-title">Uploaded Data Preview</div>
+          <div class="ll-card-sub" id="previewSub">Showing first 50 rows</div>
+        </div>
+      </div>
+      <div class="ll-card-body no-pad">
+        <div class="preview-scroll">
+          <table class="data-table" id="previewTable">
+            <thead id="previewThead"></thead>
+            <tbody id="previewTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ── Auth check ── */
+(async () => {
+  try {
+    const r = await fetch('/api/me');
+    if (!r.ok) { window.location.replace('/gateway-login.html'); }
+  } catch { window.location.replace('/gateway-login.html'); }
+})();
+
+/* ── State ── */
+let projectsList = [];
+let pickedFile   = null;
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadProjects();
+  loadHistory();
+  loadFiles();
+  setupDragDrop();
+});
+
+/* ── Load the jobs / units this user may upload to ──
+   HOD: every project. Others: only units where they hold a role other than
+   Modeller in PIMS (read live). The server re-checks on every upload. */
+async function loadProjects() {
+  const jobSel = document.getElementById('jobSel');
+  try {
+    const [me, all, mine] = await Promise.all([
+      fetch('/api/me').then(r => r.json()),
+      fetch('/api/projects').then(r => r.json()),
+      fetch('/api/users/my-roles').then(r => r.json()),
+    ]);
+    const allProjects = all.projects ?? [];
+    if (me.isHod) {
+      projectsList = allProjects;
+    } else {
+      const allowed = {};  // job → Set(unit)
+      (mine.roles || []).filter(x => x.role !== 'Modeller').forEach(x => {
+        (allowed[x.project] ||= new Set()).add(x.unit);
+      });
+      projectsList = allProjects
+        .filter(p => allowed[p.id])
+        .map(p => ({ ...p, units: [...allowed[p.id]] }));
+    }
+    if (!projectsList.length) {
+      jobSel.innerHTML = '<option value="">— no job where you can upload —</option>';
+    }
+    projectsList.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value       = p.id;
+      opt.textContent = p.name;
+      jobSel.appendChild(opt);
+    });
+  } catch { /* silent */ }
+
+  jobSel.addEventListener('change', () => {
+    const unitSel = document.getElementById('unitSel');
+    unitSel.innerHTML = '<option value="">— select —</option>';
+    unitSel.disabled = true;
+    checkReady();
+    const proj = projectsList.find(p => String(p.id) === jobSel.value);
+    if (!proj || !Array.isArray(proj.units) || !proj.units.length) return;
+    [...proj.units].sort().forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u; opt.textContent = u;
+      unitSel.appendChild(opt);
+    });
+    unitSel.disabled = false;
+  });
+
+  document.getElementById('unitSel').addEventListener('change', checkReady);
+}
+
+/* ── File picker ── */
+document.getElementById('filePicker').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (f) setFile(f);
+});
+
+function setFile(f) {
+  pickedFile = f;
+  const nameEl = document.getElementById('zoneFileName');
+  nameEl.textContent = f.name;
+  nameEl.style.display = 'inline-block';
+  document.getElementById('bcTag').lastChild.textContent = f.name;
+  checkReady();
+}
+
+/* ── Drag & drop ── */
+function setupDragDrop() {
+  const zone = document.getElementById('dropZone');
+  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) setFile(f);
+  });
+}
+
+/* ── Enable Upload button only when job + unit + file are all set ── */
+function checkReady() {
+  const jobSel  = document.getElementById('jobSel');
+  const unitSel = document.getElementById('unitSel');
+  const btn     = document.getElementById('uploadBtn');
+  btn.disabled  = !(jobSel.value && unitSel.value && pickedFile);
+}
+
+/* ── Upload ── */
+async function doUpload() {
+  const jobSel  = document.getElementById('jobSel');
+  const unitSel = document.getElementById('unitSel');
+  const proj = projectsList.find(p => String(p.id) === jobSel.value);
+  if (!proj || !unitSel.value || !pickedFile) return;
+
+  const uploadBtn  = document.getElementById('uploadBtn');
+  const spinner    = document.getElementById('uploadSpinner');
+  const resultArea = document.getElementById('resultArea');
+
+  uploadBtn.disabled  = true;
+  spinner.style.display = 'inline';
+  resultArea.style.display = 'none';
+
+  try {
+    const fd = new FormData();
+    fd.append('jobNo',  proj.id);
+    fd.append('unitNo', unitSel.value);
+    fd.append('file',   pickedFile);
+
+    const r = await fetch('/api/clash/upload', { method: 'POST', body: fd });
+    const d = await r.json();
+
+    resultArea.style.display = 'block';
+    if (d.ok) {
+      resultArea.innerHTML = `
+        <div class="result-banner success">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <div>
+            <div>✓ <strong>${d.inserted.toLocaleString()}</strong> clash row(s) saved for <strong>${escHtml(proj.id)}</strong> / <strong>${escHtml(unitSel.value)}</strong>
+              &nbsp;·&nbsp; headers found on row <strong>${d.headerRow}</strong></div>
+            ${d.skippedCount ? `<div style="margin-top:4px;font-weight:600;color:#b45309;">⚠ ${d.skippedCount.toLocaleString()} row(s) skipped — pipeline not in unit ${escHtml(unitSel.value)}</div>` : ''}
+            <div style="margin-top:4px;font-size:12px;color:var(--text-muted);">${escHtml(d.message || '')}</div>
+          </div>
+        </div>`;
+      loadHistory();
+      loadFiles();
+      loadPreview(proj.id, unitSel.value, d.inserted);
+    } else {
+      resultArea.innerHTML = `
+        <div class="result-banner error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          ${escHtml(d.error || 'Upload failed')}
+        </div>`;
+    }
+  } catch {
+    resultArea.style.display = 'block';
+    resultArea.innerHTML = `<div class="result-banner error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      Network error — please try again
+    </div>`;
+  } finally {
+    spinner.style.display = 'none';
+    checkReady();
+  }
+}
+
+/* ── Load history table ── */
+async function loadHistory() {
+  const tbody = document.getElementById('histBody');
+  try {
+    const r = await fetch('/api/clash/summary');
+    const d = await r.json();
+    if (!d.ok || !d.data.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">No clash data stored yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = d.data.map(row => {
+      const date = row.uploaded_at
+        ? new Date(row.uploaded_at).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+        : '—';
+      return `<tr>
+        <td><strong>${escHtml(row.job_no)}</strong></td>
+        <td>${escHtml(row.unit_no || '—')}</td>
+        <td>${Number(row.row_count).toLocaleString()}</td>
+        <td>${Number(row.line_count).toLocaleString()}</td>
+        <td class="muted">${date}</td>
+      </tr>`;
+    }).join('');
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">Failed to load.</td></tr>';
+  }
+}
+
+/* ── Load uploaded-files list ── */
+async function loadFiles() {
+  const tbody = document.getElementById('filesBody');
+  try {
+    const r = await fetch('/api/clash/files');
+    const d = await r.json();
+    if (!d.ok || !d.files.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-hint">No files uploaded yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = d.files.map(f => {
+      const date = new Date(f.uploaded_at).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      return `<tr>
+        <td><strong>${escHtml(f.job_no)}</strong></td>
+        <td>${escHtml(f.unit_no)}</td>
+        <td><a href="/api/clash/files/${f.id}/download">${escHtml(f.original_name)}</a></td>
+        <td>${Number(f.row_count || 0).toLocaleString()}${f.mismatch_count ? ` <span style="color:#b45309;font-size:11.5px;">(${Number(f.mismatch_count).toLocaleString()} skipped)</span>` : ''}</td>
+        <td>${escHtml(f.uploaded_by_name || f.uploaded_by || '—')}</td>
+        <td class="muted">${date}</td>
+      </tr>`;
+    }).join('');
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-hint">Failed to load.</td></tr>';
+  }
+}
+
+/* ── Load preview after upload ── */
+async function loadPreview(jobNo, unitNo, totalRows) {
+  const wrap  = document.getElementById('previewWrap');
+  const sub   = document.getElementById('previewSub');
+  const thead = document.getElementById('previewThead');
+  const tbody = document.getElementById('previewTbody');
+
+  wrap.style.display = 'block';
+  sub.textContent = `Showing first 50 of ${totalRows.toLocaleString()} rows`;
+  thead.innerHTML = `<tr><th>#</th><th>Unit</th><th>Pipeline</th><th>Item</th><th>Clashing With</th><th>Status</th><th>Type</th></tr>`;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted)">Loading preview…</td></tr>';
+
+  try {
+    const r = await fetch(`/api/clash/data?jobNo=${encodeURIComponent(jobNo)}&unitNo=${encodeURIComponent(unitNo)}`);
+    const d = await r.json();
+    if (!d.ok || !d.rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted)">No rows to preview.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = d.rows.slice(0, 50).map((row, i) =>
+      `<tr>
+        <td class="muted">${i + 1}</td>
+        <td>${escHtml(row.unit_no || '—')}</td>
+        <td>${escHtml(row.pipeline || '')}</td>
+        <td>${escHtml(row.item || '—')}</td>
+        <td>${escHtml(row.clashing_with || '—')}</td>
+        <td>${escHtml(row.clash_status || '—')}</td>
+        <td>${escHtml(row.clash_type || '—')}</td>
+      </tr>`
+    ).join('');
+
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted)">Preview failed.</td></tr>';
+  }
+}
+
+/* ── Clear form ── */
+function clearForm() {
+  document.getElementById('jobSel').value = '';
+  const unitSel = document.getElementById('unitSel');
+  unitSel.innerHTML = '<option value="">— select —</option>';
+  unitSel.disabled = true;
+  document.getElementById('filePicker').value = '';
+  document.getElementById('zoneFileName').style.display = 'none';
+  document.getElementById('bcTag').lastChild.textContent = ' No file selected';
+  pickedFile = null;
+  document.getElementById('resultArea').style.display = 'none';
+  document.getElementById('previewWrap').style.display = 'none';
+  checkReady();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

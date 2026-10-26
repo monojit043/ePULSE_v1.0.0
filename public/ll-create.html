@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Piping Line List — PIMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/ll-suite.css"/>
+  <style>
+    /* ── This page adds a left sidebar between the topbar and the
+       breadcrumb/main flow that ll-suite.css doesn't define — kept fully
+       page-scoped (new classes only) so the shared stylesheet, and every
+       other ll-*.html page using its original stacked topbar/breadbar/main
+       layout, stays untouched. ── */
+    .ll-shell { height:100vh; overflow:hidden; }
+    .ll-body-row { flex:1; display:flex; min-height:0; }
+    .ll-main { padding-top:1.25rem; gap:1.1rem; }
+
+    .cpl-sidebar {
+      width:238px; flex-shrink:0; background:var(--navy);
+      display:flex; flex-direction:column; padding:0.9rem 0.6rem;
+      overflow-y:auto;
+    }
+    .cpl-sidebar-label {
+      font-size:10px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase;
+      color:rgba(255,255,255,0.32); padding:0 0.5rem 0.5rem;
+    }
+    /* Single dense row per step: icon, label, trailing badge — no stacked
+       step-number/title/badge block. The sidebar order already implies
+       sequence, so no separate "STEP A" line either. */
+    .cpl-nav-item {
+      display:flex; align-items:center; gap:9px;
+      padding:8px 9px; border-radius:7px;
+      cursor:pointer; margin-bottom:2px; border:1px solid transparent;
+      transition:background 0.15s, border-color 0.15s;
+    }
+    .cpl-nav-item:hover { background:rgba(255,255,255,0.06); }
+    .cpl-nav-item.active { background:rgba(0,123,255,0.2); border-color:rgba(0,123,255,0.38); }
+    .cpl-nav-icon {
+      width:24px; height:24px; border-radius:6px; flex-shrink:0;
+      background:rgba(255,255,255,0.08);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .cpl-nav-item.active .cpl-nav-icon { background:rgba(0,123,255,0.35); }
+    .cpl-nav-icon svg { width:13px; height:13px; stroke:rgba(255,255,255,0.72); }
+    .cpl-nav-item.active .cpl-nav-icon svg { stroke:#fff; }
+    .cpl-nav-title {
+      flex:1; min-width:0; font-size:12px; font-weight:600; color:rgba(255,255,255,0.82);
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .cpl-nav-item.active .cpl-nav-title { color:#fff; }
+    /* Small numeric pill, matching the sidebar's own .nav-badge convention
+       in user.html (#inboxBadge etc.) — a count, not a status sentence, so
+       it can't compete with the label for width. */
+    .cpl-nav-badge {
+      flex-shrink:0; min-width:16px; text-align:center; display:inline-flex;
+      align-items:center; justify-content:center; padding:1px 6px;
+      border-radius:100px; font-size:10px; font-weight:700;
+      background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.45);
+    }
+    .cpl-nav-badge.has-data { background:var(--blue-600); color:#fff; }
+
+    .cpl-content-col { flex:1; min-width:0; display:flex; flex-direction:column; min-height:0; }
+    .cpl-content-col .ll-main { flex:1; overflow-y:auto; }
+
+    .cpl-panel { display:none; }
+    .cpl-panel.active { display:flex; flex-direction:column; gap:1.1rem; }
+
+    /* ── Compact source bar: job/unit inputs live in the card header
+       instead of a whole separate card for two fields. ── */
+    .cpl-src-inputs { display:flex; gap:8px; }
+    .cpl-src-inputs input { width:88px; padding:6px 10px; font-size:12.5px; }
+
+    /* ── Compact upload row (icon + text inline, not a big centered
+       dropzone) — click/drag still work the same, just a lot less visual
+       weight for what is a routine "attach files" action. ── */
+    .cpl-upload {
+      display:flex; align-items:center; gap:12px;
+      border:1.5px dashed var(--border); border-radius:var(--radius);
+      padding:0.85rem 1rem; cursor:pointer;
+      transition:border-color 0.15s, background 0.15s;
+    }
+    .cpl-upload:hover, .cpl-upload.drag-over { border-color:var(--blue-600); background:rgba(0,123,255,0.03); }
+    .cpl-upload-icon {
+      width:34px; height:34px; border-radius:8px; flex-shrink:0;
+      background:rgba(0,123,255,0.08); display:flex; align-items:center; justify-content:center;
+    }
+    .cpl-upload-icon svg { width:16px; height:16px; stroke:var(--blue-600); }
+    .cpl-upload-title { font-size:13px; font-weight:600; color:var(--text-primary); }
+    .cpl-upload-sub { font-size:11.5px; color:var(--text-muted); margin-top:1px; }
+
+    .cpl-file-list { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+    .cpl-file-chip {
+      display:flex; align-items:center; gap:9px; padding:7px 10px;
+      background:var(--gray-50); border:1px solid var(--border); border-radius:6px;
+      font-size:12px;
+    }
+    .cpl-file-chip svg { width:13px; height:13px; stroke:var(--blue-600); flex-shrink:0; }
+    .cpl-file-chip-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; color:var(--text-primary); }
+    .cpl-file-chip-size { color:var(--text-muted); font-size:11px; flex-shrink:0; }
+    .cpl-file-chip-remove {
+      width:18px; height:18px; border-radius:50%; border:none; background:none;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      color:var(--gray-400); flex-shrink:0;
+    }
+    .cpl-file-chip-remove:hover { background:rgba(229,57,53,0.1); color:var(--red); }
+
+    /* ── Extraction progress ── */
+    .cpl-extracting { display:none; align-items:center; gap:9px; padding:10px 0 2px; }
+    .cpl-spinner {
+      width:15px; height:15px; border-radius:50%;
+      border:2px solid var(--blue-100); border-top-color:var(--blue-600);
+      animation:cplSpin 0.7s linear infinite;
+    }
+    @keyframes cplSpin { to { transform:rotate(360deg); } }
+    .cpl-extracting-text { font-size:12px; color:var(--text-muted); font-weight:500; }
+
+    /* ── Source badge ── */
+    .cpl-src-pid { background:rgba(0,123,255,0.1); color:var(--blue-700); }
+    .cpl-src-sp  { background:rgba(124,58,237,0.1); color:#6d28d9; }
+
+    /* ── Zone pills — a line can carry more than one zone, so this is a
+       multi-toggle checkbox group styled as small letter chips, not a
+       single-value select. ── */
+    .cpl-zone-pills { display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+    .cpl-zone-pill {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:22px; height:22px; border-radius:5px; border:1px solid var(--border);
+      font-size:11px; font-weight:700; color:var(--text-muted); cursor:pointer;
+      background:#fff; user-select:none; transition:background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .cpl-zone-pill:hover { border-color:var(--blue-600); }
+    .cpl-zone-pill.active { background:var(--blue-600); border-color:var(--blue-600); color:#fff; }
+    .cpl-zone-pill input { display:none; }
+    .cpl-zone-pills.unassigned { box-shadow:0 0 0 1px rgba(245,158,11,0.5); border-radius:6px; padding:2px; }
+
+    /* ── Bulk action bar ── */
+    .cpl-bulk-bar {
+      display:none; align-items:center; gap:12px; padding:8px 14px;
+      background:rgba(0,123,255,0.06); border:1px solid rgba(0,123,255,0.2);
+      border-radius:var(--radius); font-size:12.5px;
+    }
+    .cpl-bulk-bar.show { display:flex; }
+    .cpl-bulk-count { font-weight:700; color:var(--blue-700); }
+    .cpl-bulk-spacer { flex:1; }
+
+    .cpl-empty { text-align:center; padding:2.25rem 1.5rem; color:var(--text-muted); font-size:12.5px; }
+    .cpl-empty svg { width:32px; height:32px; stroke:var(--gray-300); margin:0 auto 10px; display:block; }
+
+    @media(max-width:860px) {
+      .cpl-sidebar { width:200px; }
+    }
+  </style>
+</head>
+<body>
+<div class="ll-shell">
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header class="ll-topbar">
+    <a class="ll-topbar-logo" href="gateway.html">
+      <div class="ll-topbar-brand">
+        <span class="ll-topbar-name">PIMS</span>
+        <span class="ll-topbar-sub">Piping Isometrics</span>
+      </div>
+    </a>
+    <div class="ll-topbar-div"></div>
+    <div class="ll-topbar-module">
+      <div class="ll-topbar-module-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/>
+        </svg>
+      </div>
+      <span class="ll-topbar-module-name">Create Piping Line List</span>
+    </div>
+    <div class="ll-topbar-spacer"></div>
+    <button class="ll-back-btn" onclick="window.close()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back to Gateway
+    </button>
+  </header>
+
+  <div class="ll-body-row">
+
+    <!-- ═══ LEFT SIDEBAR — 4 stages ═══ -->
+    <nav class="cpl-sidebar">
+      <div class="cpl-sidebar-label">Build Steps</div>
+
+      <div class="cpl-nav-item active" data-panel="extract-pid" onclick="cplSwitchPanel('extract-pid')">
+        <div class="cpl-nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <span class="cpl-nav-title">Extractor from P&amp;ID</span>
+        <span class="cpl-nav-badge" id="cplBadgeA">—</span>
+      </div>
+
+      <div class="cpl-nav-item" data-panel="extract-sp" onclick="cplSwitchPanel('extract-sp')">
+        <div class="cpl-nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <span class="cpl-nav-title">From SP P&amp;ID</span>
+        <span class="cpl-nav-badge" id="cplBadgeB">—</span>
+      </div>
+
+      <div class="cpl-nav-item" data-panel="consolidated" onclick="cplSwitchPanel('consolidated')">
+        <div class="cpl-nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M8 3v18"/><path d="M3 7.5 8 3l5 4.5"/>
+            <path d="M16 21V3"/><path d="M21 16.5 16 21l-5-4.5"/>
+          </svg>
+        </div>
+        <span class="cpl-nav-title">Consolidated List</span>
+        <span class="cpl-nav-badge" id="cplBadgeC">—</span>
+      </div>
+
+      <div class="cpl-nav-item" data-panel="allocate" onclick="cplSwitchPanel('allocate')">
+        <div class="cpl-nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <span class="cpl-nav-title">Allocate Zone</span>
+        <span class="cpl-nav-badge" id="cplBadgeD">—</span>
+      </div>
+    </nav>
+
+    <!-- ═══ CONTENT ═══ -->
+    <div class="cpl-content-col">
+
+      <div class="ll-breadbar">
+        <span class="ll-bc-item">PIMS</span>
+        <span class="ll-bc-sep">›</span>
+        <span class="ll-bc-item">Line Data Suite</span>
+        <span class="ll-bc-sep">›</span>
+        <span class="ll-bc-curr" id="cplBreadCurr">Line List Extractor from P&amp;ID</span>
+        <div class="ll-bc-spacer"></div>
+        <div class="ll-bc-tag" id="cplBcTag" title="Reads real lines from currently-approved P&amp;ID revisions already uploaded to the system">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="cplBcTagText">Live data — from uploaded P&amp;IDs</span>
+        </div>
+      </div>
+
+      <main class="ll-main">
+
+        <!-- ══════════ STEP A: Line List Extractor from P&ID ══════════ -->
+        <section class="cpl-panel active" id="panel-extract-pid">
+          <div class="ll-card">
+            <div class="ll-card-header">
+              <div class="ll-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <div>
+                <div class="ll-card-title">Line List from Uploaded P&amp;IDs</div>
+                <div class="ll-card-sub">Pulls lines from currently-approved P&amp;ID revisions already in the system</div>
+              </div>
+              <div class="ll-card-actions">
+                <div class="cpl-src-inputs">
+                  <input class="form-control" id="cplJobA" placeholder="Job No" oninput="cplCheckPidReady()">
+                  <input class="form-control" id="cplUnitA" placeholder="Unit" oninput="cplCheckPidReady()">
+                </div>
+              </div>
+            </div>
+            <div class="ll-card-body">
+              <p style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:2px;">
+                Shows every line called out on P&amp;IDs currently approved for this Job/Unit.
+                To upload or manage P&amp;IDs, use <a href="pid-index.html" target="_blank" style="color:var(--blue-600);">P&amp;ID Index &amp; Documents</a>.
+              </p>
+
+              <div class="cpl-extracting" id="cplExtractingA">
+                <div class="cpl-spinner"></div>
+                <span class="cpl-extracting-text">Loading lines…</span>
+              </div>
+
+              <div style="margin-top:14px;">
+                <button class="btn btn-primary" id="cplExtractBtnA" disabled onclick="cplLoadPidLines()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  Load Lines
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ll-card" id="cplResultCardA" style="display:none;">
+            <div class="ll-card-header">
+              <div class="ll-card-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div class="ll-card-title">Extracted Lines</div>
+                <div class="ll-card-sub" id="cplResultSubA">—</div>
+              </div>
+              <div class="ll-card-actions">
+                <button class="btn btn-outline btn-sm" onclick="cplClearPidResults()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  Clear
+                </button>
+              </div>
+            </div>
+            <div class="ll-card-body no-pad">
+              <div class="tbl-scroll">
+                <table class="data-table" id="cplTableA">
+                  <thead><tr><th>Line No</th><th>Size</th><th>Spec</th><th>Service</th><th>Source P&amp;ID</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════ STEP B: Line List from SP P&ID ══════════ -->
+        <section class="cpl-panel" id="panel-extract-sp">
+          <div class="ll-card">
+            <div class="ll-card-header">
+              <div class="ll-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <div>
+                <div class="ll-card-title">Upload SP P&amp;ID Set</div>
+                <div class="ll-card-sub">PDF or image — multiple files</div>
+              </div>
+              <div class="ll-card-actions">
+                <div class="cpl-src-inputs">
+                  <input class="form-control" id="cplJobB" placeholder="Job No">
+                  <input class="form-control" id="cplUnitB" placeholder="Unit">
+                </div>
+              </div>
+            </div>
+            <div class="ll-card-body">
+              <div class="cpl-upload" id="cplDropB" onclick="document.getElementById('cplFileB').click()">
+                <div class="cpl-upload-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div>
+                  <div class="cpl-upload-title">Drop SP P&amp;ID files, or click to browse</div>
+                  <div class="cpl-upload-sub">.pdf, .png, .jpg — multiple files allowed</div>
+                </div>
+              </div>
+              <input type="file" id="cplFileB" multiple accept=".pdf,.png,.jpg,.jpeg" style="display:none">
+              <div class="cpl-file-list" id="cplFileListB"></div>
+
+              <div class="cpl-extracting" id="cplExtractingB">
+                <div class="cpl-spinner"></div>
+                <span class="cpl-extracting-text">Extracting line numbers…</span>
+              </div>
+
+              <div style="margin-top:14px;">
+                <button class="btn btn-primary" id="cplExtractBtnB" disabled onclick="cplExtract('sp')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  Extract Line Numbers
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ll-card" id="cplResultCardB" style="display:none;">
+            <div class="ll-card-header">
+              <div class="ll-card-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div class="ll-card-title">Extracted Lines</div>
+                <div class="ll-card-sub" id="cplResultSubB">—</div>
+              </div>
+              <div class="ll-card-actions">
+                <button class="btn btn-outline btn-sm" onclick="cplClearSource('sp')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  Clear
+                </button>
+              </div>
+            </div>
+            <div class="ll-card-body no-pad">
+              <div class="tbl-scroll">
+                <table class="data-table" id="cplTableB">
+                  <thead><tr><th>Line No</th><th>Size</th><th>Spec</th><th>Sheet No</th><th>Source File</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════ STEP C: Consolidated Line List ══════════ -->
+        <section class="cpl-panel" id="panel-consolidated">
+          <div class="ll-card">
+            <div class="ll-card-header">
+              <div class="ll-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v18"/><path d="M3 7.5 8 3l5 4.5"/><path d="M16 21V3"/><path d="M21 16.5 16 21l-5-4.5"/></svg>
+              </div>
+              <div>
+                <div class="ll-card-title">Consolidated Line List</div>
+                <div class="ll-card-sub">Merges lines parsed from uploaded P&amp;IDs with lines from the Line List Normalizer, matched by unit + sequence no + fluid code.</div>
+              </div>
+              <div class="ll-card-actions">
+                <div class="cpl-src-inputs">
+                  <input class="form-control" id="cplJobC" placeholder="Job No" oninput="cplCheckConsolReady()">
+                  <input class="form-control" id="cplUnitC" placeholder="Unit" oninput="cplCheckConsolReady()">
+                </div>
+              </div>
+            </div>
+            <div class="ll-card-body">
+              <div class="cpl-extracting" id="cplExtractingC">
+                <div class="cpl-spinner"></div>
+                <span class="cpl-extracting-text">Building consolidated list…</span>
+              </div>
+              <div style="margin-top:14px;">
+                <button class="btn btn-primary" id="cplExtractBtnC" disabled onclick="cplLoadConsolidated()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  Build Consolidated List
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="cplConsolidatedResults" style="display:none;">
+            <div class="ll-stats">
+              <div class="ll-stat blue">
+                <span class="ll-stat-value" id="cplStatTotal">0</span>
+                <span class="ll-stat-label">Total Lines</span>
+              </div>
+              <div class="ll-stat">
+                <span class="ll-stat-value" id="cplStatFromPid">0</span>
+                <span class="ll-stat-label">From P&amp;ID</span>
+              </div>
+              <div class="ll-stat">
+                <span class="ll-stat-value" id="cplStatFromLl">0</span>
+                <span class="ll-stat-label">From Line List</span>
+              </div>
+              <div class="ll-stat amber">
+                <span class="ll-stat-value" id="cplStatMismatch">0</span>
+                <span class="ll-stat-label">Mismatches</span>
+              </div>
+            </div>
+
+            <div class="ll-card">
+              <div class="ll-card-header">
+                <div class="ll-card-icon green">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                  <div class="ll-card-title">Consolidated Lines</div>
+                  <div class="ll-card-sub" id="cplResultSubC">—</div>
+                </div>
+                <div class="ll-card-actions">
+                  <div class="search-wrap" style="min-width:200px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input class="search-input" id="cplConsolidatedSearch" placeholder="Search line/seq no…" oninput="cplRenderConsolidatedReal()">
+                  </div>
+                  <button class="btn btn-outline btn-sm" onclick="cplClearConsolidatedResults()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Clear
+                  </button>
+                </div>
+              </div>
+              <div class="ll-card-body no-pad">
+                <div class="tbl-scroll">
+                  <table class="data-table" id="cplTableC">
+                    <thead><tr><th>Line No</th><th>Seq No</th><th>Size</th><th>Service</th><th>Spec</th><th>Source</th><th></th></tr></thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="ll-card" id="cplMismatchCard" style="display:none;">
+              <div class="ll-card-header">
+                <div class="ll-card-icon amber">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div>
+                  <div class="ll-card-title">Mismatch Summary</div>
+                  <div class="ll-card-sub">Lines matched on unit + seq no where P&amp;ID content disagrees with the Line List Normalizer</div>
+                </div>
+              </div>
+              <div class="ll-card-body no-pad">
+                <div class="tbl-scroll">
+                  <table class="data-table" id="cplTableMismatch">
+                    <thead><tr><th>Seq No</th><th>Field</th><th>P&amp;ID Value</th><th>Line List Value</th><th>Source P&amp;ID</th><th>Source File</th></tr></thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="cplConsolidatedEmpty" class="cpl-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v18"/><path d="M3 7.5 8 3l5 4.5"/><path d="M16 21V3"/><path d="M21 16.5 16 21l-5-4.5"/></svg>
+            Enter a Job No and Unit above and build the consolidated list.
+          </div>
+        </section>
+
+        <!-- ══════════ STEP D: Allocate Zone & Create Piping Line List ══════════ -->
+        <section class="cpl-panel" id="panel-allocate">
+          <div class="ll-card">
+            <div class="ll-card-header">
+              <div class="ll-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div>
+                <div class="ll-card-title">Allocate Zone</div>
+                <div class="ll-card-sub">Loads the Consolidated Line List for this Job/Unit — assign each line (fluid code-unit-sequence no) to a zone before creating the final piping line list</div>
+              </div>
+              <div class="ll-card-actions">
+                <div class="cpl-src-inputs">
+                  <input class="form-control" id="cplJobD" placeholder="Job No" oninput="cplCheckAllocateReady()">
+                  <input class="form-control" id="cplUnitD" placeholder="Unit" oninput="cplCheckAllocateReady()">
+                </div>
+              </div>
+            </div>
+            <div class="ll-card-body">
+              <div class="cpl-extracting" id="cplExtractingD">
+                <div class="cpl-spinner"></div>
+                <span class="cpl-extracting-text">Loading consolidated lines…</span>
+              </div>
+              <div style="margin-top:14px;">
+                <button class="btn btn-primary" id="cplLoadBtnD" disabled onclick="cplLoadAllocateLines()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  Load Lines
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ll-card">
+            <div class="ll-card-header">
+              <div>
+                <div class="ll-card-title">Lines</div>
+                <div class="ll-card-sub" id="cplResultSubD">—</div>
+              </div>
+              <div class="ll-card-actions">
+                <button class="btn btn-green" id="cplCreateBtn" disabled onclick="cplCreateLineList()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  Create Piping Line List
+                </button>
+              </div>
+            </div>
+            <div class="ll-card-body no-pad">
+
+              <div style="padding:1rem 1.25rem 0;">
+                <div class="cpl-bulk-bar" id="cplBulkBar">
+                  <span><span class="cpl-bulk-count" id="cplBulkCount">0</span> selected</span>
+                  <div class="cpl-bulk-spacer"></div>
+                  <span style="font-size:11.5px;color:var(--text-muted);">Add zone(s):</span>
+                  <div class="cpl-zone-pills" id="cplBulkZonePills"></div>
+                  <button class="btn btn-primary btn-sm" onclick="cplBulkAssignZone()">Apply to Selected</button>
+                </div>
+              </div>
+
+              <div id="cplAllocateEmpty" class="cpl-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Enter a Job No and Unit above and load lines.
+              </div>
+              <div class="tbl-scroll" id="cplAllocateTableWrap" style="display:none;">
+                <table class="data-table" id="cplTableD">
+                  <thead>
+                    <tr>
+                      <th style="width:34px;"><input type="checkbox" id="cplSelectAll" onchange="cplToggleSelectAll(this)"></th>
+                      <th>Line ID</th><th>Size</th><th>Spec</th><th>Source</th><th>Zone</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="ll-card" id="cplSuccessCard" style="display:none;">
+            <div class="ll-card-body">
+              <div class="result-banner success" style="display:flex;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <strong id="cplSuccessTitle">Piping Line List created.</strong>
+                  <div style="margin-top:2px;font-weight:400;">Saved to the Piping Line List for this Job/Unit. This is a staging record — an ISO drawing still needs to be uploaded against each line separately.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<script src="js/ll-create.js"></script>
+</body>
+</html>

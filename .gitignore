@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Bundled portable Node runtime (binary, not source)
+backend/node-v22.19.0-win-x64/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Runtime / generated data
+backend/uploads/
+backend/temp/
+backend/batch_input/
+backend/batch_logs/
+backend/s3d_export_logs/
+output/
+IDF/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+
+# Client drawings / sample inputs — never in git
+B862 p&idS/
+
+# Local backups
+db_backups/
+*.dump
+*.bundle
+
+# Editor / Claude Code settings for this PC
+.claude/
+.vscode/
