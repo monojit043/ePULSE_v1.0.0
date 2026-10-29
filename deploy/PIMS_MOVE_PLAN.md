@@ -18,7 +18,7 @@ pushed); inch link applied. **Phase B 2026-10-22** — PIMS removed from ePULSE 
 | 3 | Line list and clash data | PIMS reads **its own** `linelist_lines` (710 rows) and `iso_clash_items` (1,384) in `PIMS_SQL`. The ISO pre-check **"Clash in Model"** is restored. |
 | 4 | INCH Data Upload | **Stays in ePULSE.** ePULSE owns `inch_data`; PIMS reads it live (see §4). |
 | 4 | Generate Report | **Part of PIMS.** ePULSE keeps a **"Generate Report"** button that opens the PIMS report page. |
-| 5 | Port | PIMS runs on **3400** (3300 ePULSE, 4000 SSMS, 5500 MRCS, 5600 Meetings). |
+| 5 | Port | PIMS runs on **3400** (3000 ePULSE, 4000 SSMS, 5500 MRCS, 5600 Meetings). |
 
 ---
 

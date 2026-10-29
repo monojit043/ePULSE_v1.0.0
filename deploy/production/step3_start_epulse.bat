@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================
-REM  ePULSE production - STEP 3: start the server (port from backend\.env, 3300)
+REM  ePULSE production - STEP 3: start the server (port from backend\.env, 3000)
 REM  Keep this window open; closing it stops ePULSE. To run it in the
 REM  background / at boot, use the same method as the other modules on this server.
 REM ============================================================

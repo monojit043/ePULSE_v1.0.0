@@ -4,7 +4,7 @@ Production mirrors development exactly:
 
 | Development | Production (office) | Holds |
 |---|---|---|
-| PC-1 (`D:\ePULSE_DEV_v1.0.0`, port 3300) | **Office apps server** | ePULSE code + its own database `ePULSE_v1.0.0` |
+| PC-1 (`D:\ePULSE_DEV_v1.0.0`, port 3000) | **Office apps server** | ePULSE code + its own database `ePULSE_v1.0.0` |
 | PC-2 | **Office PIMS server** | `eil_employees` (logins), `cmp_pims_1014` (projects, units, roles) — ePULSE only **reads** them, live |
 
 ePULSE starts **empty** in production: no line list, P&IDs, GAD, clash or inch data are carried over.
@@ -79,7 +79,7 @@ Copy `deploy\production\env.production.template` to `backend\.env` and fill ever
 | `SESSION_SECRET` | new random value (command in the template) |
 | `SSO_SECRET` | new random value — **keep it**: every production module (MRCS, SSMS, IPMCS) must later use the same one |
 
-Leave `DB_NAME=ePULSE_v1.0.0` and `PORT=3300` unless 3300 is already taken on this server.
+Leave `DB_NAME=ePULSE_v1.0.0` and `PORT=3000` unless 3000 is already taken on this server.
 
 ### B3. Create the empty database
 Double-click **`deploy\production\step1_create_database.bat`** (it asks for the postgres password).
@@ -90,9 +90,9 @@ Double-click **`deploy\production\step2_link_pims_server.bat`**.
 Expected: `✅ Dry run OK`, then `✅ Linked to PC-2 (<PIMS server IP>)` with live counts
 (users, projects, units …). If the dry run fails, nothing was changed — fix Part A / `.env` and run it again.
 
-### B5. Open port 3300 on the apps server (once, as administrator)
+### B5. Open port 3000 on the apps server (once, as administrator)
 ```bat
-netsh advfirewall firewall add rule name="ePULSE 3300" dir=in action=allow protocol=TCP localport=3300
+netsh advfirewall firewall add rule name="ePULSE 3000" dir=in action=allow protocol=TCP localport=3000
 ```
 
 ### B6. Start
@@ -106,7 +106,7 @@ Keep the window open (closing it stops ePULSE). To run it in the background / st
 use the same method the server already uses for MRCS and SSMS.
 
 ### B7. Check
-From any office PC: `http://<apps server IP>:3300/gateway-login.html`
+From any office PC: `http://<apps server IP>:3000/gateway-login.html`
 - log in with a PIMS employee ID — the gateway opens with that person's jobs/units
 - open Line List → Normalize, P&ID Index, GAD — pages load and lists are empty
 - upload one test P&ID index / line list and see it appear
